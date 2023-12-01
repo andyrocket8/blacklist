@@ -26,7 +26,6 @@ class RedisConnectionPool:
 
     def __del__(self):
         logging.debug('Closing redis connection pool')
-        self.connection_pool.close()
 
 
 # init connection
