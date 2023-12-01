@@ -16,7 +16,7 @@ BASE_DIR: Path = Path(os_path.dirname(os_path.dirname(os_path.abspath(__file__))
 class AppSettings(BaseSettings):
     host: str = 'localhost'  # application host
     port: int = 8000  # application port
-    app_title: str = 'Black list processor'  # application title
+    app_title: str = "Black list processor"  # application title
     use_redis_storage: bool = True  # use Redis database for storing black lists
     redis_host: str = 'localhost'  # redis host
     redis_port: int = 6379  # redis port

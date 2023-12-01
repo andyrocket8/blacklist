@@ -1,5 +1,7 @@
 LOG_FORMAT = '%(asctime)s %(levelname)s [%(name)s] %(message)s'
-LOG_DEFAULT_HANDLERS = ['console', ]
+LOG_DEFAULT_HANDLERS = [
+    'console',
+]
 
 # uvicorn server logging setup
 # https://docs.python.org/3/howto/logging.html
@@ -11,9 +13,7 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
-            'format': LOG_FORMAT
-        },
+        'verbose': {'format': LOG_FORMAT},
         'default': {
             '()': 'uvicorn.logging.DefaultFormatter',
             'fmt': '%(levelprefix)s %(message)s',

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 
 class AgentAddressesInfo(BaseModel):
-    """ Information about addresses from agent """
+    """Information about addresses from agent"""
+
     source_agent: str
     addresses: list[IPv4Address]
