@@ -17,7 +17,6 @@ app_configs: dict[str, Any] = dict(
 )
 
 
-
 # Show OpenAPI interface if allowed
 if app_settings.show_openapi:
     # OpenAPI uri
