@@ -1,4 +1,4 @@
-# Schemas for blacklisted addresses
+"""Schemas for blacklisted addresses"""
 from ipaddress import IPv4Address
 
 from pydantic import BaseModel
