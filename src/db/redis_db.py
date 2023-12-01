@@ -1,11 +1,13 @@
 # Redis database connector classes
 import logging
-from typing import Any, AsyncGenerator
+from typing import Any
+from typing import AsyncGenerator
 
 from redis.asyncio import ConnectionPool
 from redis.asyncio import Redis as RedisAsyncio
 
-from src.core.config import AppSettings, app_settings
+from src.core.config import AppSettings
+from src.core.config import app_settings
 
 
 class RedisConnectionPool:

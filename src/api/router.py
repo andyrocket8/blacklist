@@ -1,9 +1,11 @@
 from ipaddress import IPv4Address
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
+from fastapi import Depends
 
-from src.db.redis_db import RedisAsyncio, redis_client
+from src.db.redis_db import RedisAsyncio
+from src.db.redis_db import redis_client
 from src.schemas.addresses_schemas import AgentAddressesInfo
 
 api_router = APIRouter()
