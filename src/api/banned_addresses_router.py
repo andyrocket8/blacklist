@@ -11,17 +11,14 @@ from src.schemas.addresses_schemas import AgentAddressesInfo
 from src.schemas.addresses_schemas import CountResponseSchema
 from src.schemas.addresses_schemas import DeleteResponseSchema
 from src.service.addresses_service import BlackListAddressesDBService
+from src.utils.router_utils import get_query_params
 
 api_router = APIRouter()
 
 
-def get_query_params(records_count: int = 10, all_records: bool = False):
-    return {'records_count': records_count, 'all_records': all_records}
-
-
 @api_router.get(
-    '/banned',
-    summary='Retrieve all blacklisted addresses from storage',
+    '/',
+    summary='Retrieve blacklisted addresses from storage (all or partial)',
     response_model=list[IPv4Address],
 )
 async def get_banned_addresses(
@@ -32,7 +29,7 @@ async def get_banned_addresses(
     return await service_obj.get_records(**query_params)
 
 
-@api_router.post('/banned', summary='Add blacklisted addresses to storage', response_model=AddResponseSchema)
+@api_router.post('/', summary='Add blacklisted addresses to storage', response_model=AddResponseSchema)
 async def save_banned_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
@@ -42,7 +39,7 @@ async def save_banned_addresses(
     return AddResponseSchema(added=added_count)
 
 
-@api_router.delete('/banned', summary='Delete blacklisted addresses from storage', response_model=DeleteResponseSchema)
+@api_router.delete('/', summary='Delete blacklisted addresses from storage', response_model=DeleteResponseSchema)
 async def delete_banned_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
@@ -52,7 +49,7 @@ async def delete_banned_addresses(
     return DeleteResponseSchema(deleted=deleted_count)
 
 
-@api_router.get('/banned/count', summary='Count blacklisted addresses in storage', response_model=CountResponseSchema)
+@api_router.get('/count', summary='Count blacklisted addresses in storage', response_model=CountResponseSchema)
 async def count_banned_addresses(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
