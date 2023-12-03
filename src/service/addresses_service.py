@@ -43,7 +43,7 @@ class AddressesDBService:
         async def iter_over_addresses(records: list[IPv4Address]) -> AsyncGenerator[tuple[int, str], None]:
             """Iterate over recordset"""
             flush_counter = 0
-            board_value = BATCH_SIZE - 1
+            board_value = BATCH_SIZE
             for value in records:
                 flush_counter += 1
                 yield board_value == flush_counter, str(value)

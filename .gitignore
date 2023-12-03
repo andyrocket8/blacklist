@@ -1,9 +1,10 @@
 
 .idea/
 .env
-.compose-redis.env
+compose-redis.env
 
 # cache files
 __pycache__/
 *.pyc
 .mypy_cache
+notebooks/

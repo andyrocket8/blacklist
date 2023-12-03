@@ -6,9 +6,9 @@ services:
       - redis_data:/data
     network_mode: host
     env_file:
-      - .compose-redis.env
+      - ./compose-redis.env
     ports:
-      - "6379:$REDIS_PORT"
+      - "6379:${REDIS_PORT}"
 
   # app:
   #  build:
