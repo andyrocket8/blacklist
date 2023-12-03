@@ -21,3 +21,15 @@ class AgentAddressesInfo(BaseModel):
 
     source_agent: str
     addresses: list[IPv4Address]
+
+
+class AddResponseSchema(BaseModel):
+    added: int
+
+
+class DeleteResponseSchema(BaseModel):
+    deleted: int
+
+
+class CountResponseSchema(BaseModel):
+    count: int

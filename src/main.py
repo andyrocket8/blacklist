@@ -4,7 +4,7 @@ import uvicorn  # type: ignore[import-untyped]
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
-from src.api.router import api_router
+from src.api.addresses_router import api_router
 from src.core.config import app_settings
 
 app_configs: dict[str, Any] = dict(
@@ -26,7 +26,7 @@ if app_settings.show_openapi:
 
 
 app = FastAPI(**app_configs)
-app.include_router(api_router, prefix='')
+app.include_router(api_router, prefix='/addresses')
 
 
 if __name__ == '__main__':
