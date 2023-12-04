@@ -6,12 +6,13 @@ from fastapi import Depends
 
 from src.db.redis_db import RedisAsyncio
 from src.db.redis_db import redis_client
-from src.schemas.addresses_schemas import AddResponseSchema
 from src.schemas.addresses_schemas import AgentAddressesInfo
-from src.schemas.addresses_schemas import CountResponseSchema
-from src.schemas.addresses_schemas import DeleteResponseSchema
+from src.schemas.common_response_schemas import AddResponseSchema
+from src.schemas.common_response_schemas import CountResponseSchema
+from src.schemas.common_response_schemas import DeleteResponseSchema
+from src.service.addresses_service import AllowedAddressesDBService
 from src.service.addresses_service import BlackListAddressesDBService
-from src.utils.router_utils import get_query_params
+from src.utils.router_utils import get_query_params_with_filter
 
 api_router = APIRouter()
 
@@ -23,10 +24,18 @@ api_router = APIRouter()
 )
 async def get_banned_addresses(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
-    query_params: Annotated[dict, Depends(get_query_params)],
+    query_params: Annotated[dict, Depends(get_query_params_with_filter)],
 ):
     service_obj = BlackListAddressesDBService(redis_client_obj)
-    return await service_obj.get_records(**query_params)
+    banned_query_params = query_params.copy()
+    del banned_query_params['filter_records']
+    banned_records = await service_obj.get_records(**banned_query_params)
+    if query_params['filter_records']:
+        # filter by allowed IPs
+        allowed_service_obj = AllowedAddressesDBService(redis_client_obj)
+        allowed_records = await allowed_service_obj.get_records(all_records=True)
+        return [x for x in banned_records if x not in allowed_records]
+    return banned_records
 
 
 @api_router.post('/', summary='Add blacklisted addresses to storage', response_model=AddResponseSchema)

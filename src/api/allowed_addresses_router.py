@@ -6,10 +6,10 @@ from fastapi import Depends
 
 from src.db.redis_db import RedisAsyncio
 from src.db.redis_db import redis_client
-from src.schemas.addresses_schemas import AddResponseSchema
 from src.schemas.addresses_schemas import AgentAddressesInfo
-from src.schemas.addresses_schemas import CountResponseSchema
-from src.schemas.addresses_schemas import DeleteResponseSchema
+from src.schemas.common_response_schemas import AddResponseSchema
+from src.schemas.common_response_schemas import CountResponseSchema
+from src.schemas.common_response_schemas import DeleteResponseSchema
 from src.service.addresses_service import AllowedAddressesDBService
 from src.utils.router_utils import get_query_params
 
@@ -30,7 +30,7 @@ async def get_allowed_addresses(
 
 
 @api_router.post('/', summary='Add allowed addresses to storage', response_model=AddResponseSchema)
-async def save_banned_addresses(
+async def save_allowed_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
@@ -40,7 +40,7 @@ async def save_banned_addresses(
 
 
 @api_router.delete('/', summary='Delete allowed addresses from storage', response_model=DeleteResponseSchema)
-async def delete_banned_addresses(
+async def delete_allowed_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
@@ -50,7 +50,7 @@ async def delete_banned_addresses(
 
 
 @api_router.get('/count', summary='Count allowed addresses in storage', response_model=CountResponseSchema)
-async def count_banned_addresses(
+async def count_allowed_addresses(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
     service_obj = AllowedAddressesDBService(redis_client_obj)
