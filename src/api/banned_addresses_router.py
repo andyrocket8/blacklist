@@ -1,4 +1,3 @@
-from ipaddress import IPv4Address
 from typing import Annotated
 
 from fastapi import APIRouter
@@ -7,11 +6,14 @@ from fastapi import Depends
 from src.db.redis_db import RedisAsyncio
 from src.db.redis_db import redis_client
 from src.schemas.addresses_schemas import AgentAddressesInfo
+from src.schemas.addresses_schemas import IpV4AddressList
 from src.schemas.common_response_schemas import AddResponseSchema
 from src.schemas.common_response_schemas import CountResponseSchema
 from src.schemas.common_response_schemas import DeleteResponseSchema
 from src.service.addresses_db_service import AllowedAddressesDBService
 from src.service.addresses_db_service import BlackListAddressesDBService
+from src.service.networks_db_service import AllowedNetworksDBService
+from src.service.process_banned_ips import without_allowed_ips
 from src.utils.router_utils import get_query_params_with_filter
 
 api_router = APIRouter()
@@ -20,7 +22,7 @@ api_router = APIRouter()
 @api_router.get(
     '/',
     summary='Retrieve blacklisted addresses from storage (all or partial)',
-    response_model=list[IPv4Address],
+    response_model=IpV4AddressList,
 )
 async def get_banned_addresses(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
@@ -34,7 +36,9 @@ async def get_banned_addresses(
         # filter by allowed IPs
         allowed_service_obj = AllowedAddressesDBService(redis_client_obj)
         allowed_records = await allowed_service_obj.get_records(all_records=True)
-        return [x for x in banned_records if x not in allowed_records]
+        allowed_net_service_obj = AllowedNetworksDBService(redis_client_obj)
+        allowed_networks = await allowed_net_service_obj.get_records(all_records=True)
+        return [x async for x in without_allowed_ips(banned_records, allowed_records, allowed_networks)]
     return banned_records
 
 

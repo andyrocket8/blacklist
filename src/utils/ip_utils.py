@@ -3,6 +3,8 @@ from random import randint
 from typing import Generator
 from typing import Optional
 
+from src.schemas.addresses_schemas import IpV4AddressList
+
 MAX_IP_ADDRESS = pow(2, 32) - 1
 
 
@@ -17,6 +19,6 @@ def gen_random_ip(max_count: Optional[int] = None) -> Generator[IPv4Address, Non
                 break
 
 
-def random_ip_addresses(count: int) -> list[IPv4Address]:
+def random_ip_addresses(count: int) -> IpV4AddressList:
     """Generate random IP addresses"""
     return [x for x in gen_random_ip(count)]

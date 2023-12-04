@@ -1,4 +1,3 @@
-from ipaddress import IPv4Network
 from typing import Annotated
 
 from fastapi import APIRouter
@@ -10,6 +9,7 @@ from src.schemas.common_response_schemas import AddResponseSchema
 from src.schemas.common_response_schemas import CountResponseSchema
 from src.schemas.common_response_schemas import DeleteResponseSchema
 from src.schemas.network_schemas import AgentNetworkInfo
+from src.schemas.network_schemas import IPv4NetworkList
 from src.service.networks_db_service import AllowedNetworksDBService
 from src.utils.router_utils import get_query_params
 
@@ -19,7 +19,7 @@ api_router = APIRouter()
 @api_router.get(
     '/',
     summary='Retrieve allowed networks from storage (all or partial)',
-    response_model=list[IPv4Network],
+    response_model=IPv4NetworkList,
 )
 async def get_allowed_networks(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],

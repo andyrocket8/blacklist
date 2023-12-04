@@ -4,6 +4,8 @@ from json import JSONEncoder
 
 from .base_input_schema import BaseInputSchema
 
+IPv4NetworkList = list[IPv4Network]
+
 
 class IpNetworkEncoder(JSONEncoder):
     def __init__(self, *args, **kwargs):
@@ -19,4 +21,4 @@ class IpNetworkEncoder(JSONEncoder):
 class AgentNetworkInfo(BaseInputSchema):
     """Information about networks from agent"""
 
-    networks: list[IPv4Network]
+    networks: IPv4NetworkList

@@ -1,4 +1,3 @@
-from ipaddress import IPv4Address
 from typing import Annotated
 
 from fastapi import APIRouter
@@ -7,6 +6,7 @@ from fastapi import Depends
 from src.db.redis_db import RedisAsyncio
 from src.db.redis_db import redis_client
 from src.schemas.addresses_schemas import AgentAddressesInfo
+from src.schemas.addresses_schemas import IpV4AddressList
 from src.schemas.common_response_schemas import AddResponseSchema
 from src.schemas.common_response_schemas import CountResponseSchema
 from src.schemas.common_response_schemas import DeleteResponseSchema
@@ -19,7 +19,7 @@ api_router = APIRouter()
 @api_router.get(
     '/',
     summary='Retrieve allowed addresses from storage (all or partial)',
-    response_model=list[IPv4Address],
+    response_model=IpV4AddressList,
 )
 async def get_allowed_addresses(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
