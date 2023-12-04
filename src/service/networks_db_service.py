@@ -2,7 +2,7 @@ from ipaddress import IPv4Network
 
 from src.core.settings import ALLOWED_NETWORKS_SET_ID
 
-from .addresses_service import AbstractDBService
+from .abstract_db_service import AbstractDBService
 
 
 class AllowedNetworksDBService(AbstractDBService[IPv4Network]):

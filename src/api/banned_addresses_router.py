@@ -10,8 +10,8 @@ from src.schemas.addresses_schemas import AgentAddressesInfo
 from src.schemas.common_response_schemas import AddResponseSchema
 from src.schemas.common_response_schemas import CountResponseSchema
 from src.schemas.common_response_schemas import DeleteResponseSchema
-from src.service.addresses_service import AllowedAddressesDBService
-from src.service.addresses_service import BlackListAddressesDBService
+from src.service.addresses_db_service import AllowedAddressesDBService
+from src.service.addresses_db_service import BlackListAddressesDBService
 from src.utils.router_utils import get_query_params_with_filter
 
 api_router = APIRouter()

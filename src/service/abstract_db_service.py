@@ -1,5 +1,4 @@
 import logging
-from ipaddress import IPv4Address
 from typing import Any
 from typing import AsyncGenerator
 from typing import Awaitable
@@ -10,9 +9,7 @@ from typing import TypeVar
 from typing import cast
 from uuid import UUID
 
-from src.core.settings import ALLOWED_ADDRESSES_SET_ID
 from src.core.settings import BATCH_SIZE
-from src.core.settings import BLACK_LIST_ADDRESSES_SET_ID
 from src.db.redis_db import RedisAsyncio
 
 T = TypeVar('T')
@@ -70,12 +67,12 @@ class AbstractDBService(Generic[T]):
         async for need_flush, record in iter_over_records(records):
             records_to_add.append(record)
             if need_flush:
-                await self.write_set(records_to_add)
-                saved_records += len(records_to_add)
+                iter_written = await self.write_set(records_to_add)
+                saved_records += iter_written
                 records_to_add = []
         if len(records_to_add):
-            await self.write_set(records_to_add)
-            saved_records += len(records_to_add)
+            iter_written = await self.write_set(records_to_add)
+            saved_records += iter_written
         logging.debug('Total wrote %d records to Redis database', saved_records)
         return saved_records
 
@@ -94,12 +91,12 @@ class AbstractDBService(Generic[T]):
         async for need_flush, record in iter_over_records(records):
             records_to_delete.append(record)
             if need_flush:
-                await self.del_set(records_to_delete)
-                deleted_records += len(records_to_delete)
+                iter_deleted = await self.del_set(records_to_delete)
+                deleted_records += iter_deleted
                 records_to_delete = []
         if len(records_to_delete):
-            await self.del_set(records_to_delete)
-            deleted_records += len(records_to_delete)
+            iter_deleted = await self.del_set(records_to_delete)
+            deleted_records += iter_deleted
         logging.debug('Total deleted %d records from Redis database', deleted_records)
         return deleted_records
 
@@ -107,17 +104,3 @@ class AbstractDBService(Generic[T]):
         set_id: str = str(self.set_id)
         logging.debug('Counting records in Redis database, set ID: %s', set_id)
         return await cast(Awaitable[Any], self.db.scard(set_id))
-
-
-class BlackListAddressesDBService(AbstractDBService[IPv4Address]):
-    """Serve operations with black list addresses in Redis database"""
-
-    service_type = IPv4Address
-    set_id = BLACK_LIST_ADDRESSES_SET_ID
-
-
-class AllowedAddressesDBService(AbstractDBService[IPv4Address]):
-    """Serve operations with allowed addresses in Redis database"""
-
-    service_type = IPv4Address
-    set_id = ALLOWED_ADDRESSES_SET_ID

@@ -16,6 +16,8 @@ _test:
 		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "mypy src"
 		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "pytest"
 
+_start_redis:
+		echo "set -a && source compose-redis.env && docker compose up -d" | bash
 
 build:
 		$(MAKE) _builder
@@ -26,3 +28,6 @@ test:
 
 clean_build:
 		$(MAKE) _clean_builder
+
+start_redis:
+		$(MAKE) _start_redis

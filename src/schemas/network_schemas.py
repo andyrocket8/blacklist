@@ -2,7 +2,7 @@
 from ipaddress import IPv4Network
 from json import JSONEncoder
 
-from pydantic import BaseModel
+from .base_input_schema import BaseInputSchema
 
 
 class IpNetworkEncoder(JSONEncoder):
@@ -16,8 +16,7 @@ class IpNetworkEncoder(JSONEncoder):
         return JSONEncoder.default(self, o)
 
 
-class AgentNetworkInfo(BaseModel):
+class AgentNetworkInfo(BaseInputSchema):
     """Information about networks from agent"""
 
-    source_agent: str
     networks: list[IPv4Network]

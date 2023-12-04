@@ -10,7 +10,7 @@ from src.schemas.common_response_schemas import AddResponseSchema
 from src.schemas.common_response_schemas import CountResponseSchema
 from src.schemas.common_response_schemas import DeleteResponseSchema
 from src.schemas.network_schemas import AgentNetworkInfo
-from src.service.networks_service import AllowedNetworksDBService
+from src.service.networks_db_service import AllowedNetworksDBService
 from src.utils.router_utils import get_query_params
 
 api_router = APIRouter()

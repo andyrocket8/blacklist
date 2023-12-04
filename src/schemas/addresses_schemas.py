@@ -2,7 +2,7 @@
 from ipaddress import IPv4Address
 from json import JSONEncoder
 
-from pydantic import BaseModel
+from .base_input_schema import BaseInputSchema
 
 
 class IpAddressEncoder(JSONEncoder):
@@ -16,8 +16,7 @@ class IpAddressEncoder(JSONEncoder):
         return JSONEncoder.default(self, o)
 
 
-class AgentAddressesInfo(BaseModel):
+class AgentAddressesInfo(BaseInputSchema):
     """Information about addresses from agent"""
 
-    source_agent: str
     addresses: list[IPv4Address]
