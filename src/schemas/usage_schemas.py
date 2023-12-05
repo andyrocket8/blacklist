@@ -23,7 +23,7 @@ class UsageRecord(BaseModel):
 class HistoryRecordInfo(BaseModel):
     remover_source: str
     remove_info_time: Annotated[datetime.datetime, Field(default_factory=now_cur_tz)]
-    source_records: SourceRecordInfo
+    usage_records: list[SourceRecordInfo]
 
 
 class HistoryRecord(BaseModel):
@@ -31,7 +31,7 @@ class HistoryRecord(BaseModel):
     history_records: Annotated[list[HistoryRecordInfo], Field(default_factory=list)]
 
 
-class DateTimeEncoder(JSONEncoder):
+class UsageClassesEncoder(JSONEncoder):
     def __init__(self, *args, **kwargs):
         JSONEncoder.__init__(self, *args, **kwargs)
 
@@ -47,7 +47,7 @@ class DateTimeEncoder(JSONEncoder):
             return {
                 'remover_source': o.remover_source,
                 'remove_info_time': o.remove_info_time,
-                'source_records': o.source_records,
+                'usage_records': o.usage_records,
             }
         if class_name == 'HistoryRecord':
             return {'last_update_time': o.last_update_time, 'history_records': o.history_records}

@@ -7,7 +7,7 @@ from src.schemas.usage_schemas import HistoryRecordInfo
 from src.schemas.usage_schemas import SourceRecordInfo
 from src.schemas.usage_schemas import UsageRecord
 
-from .usage_db_service import HistoryDBService
+from .history_db_service import HistoryDBService
 from .usage_db_service import UsageDBService
 
 
@@ -105,7 +105,7 @@ class HistoryProcessor:
             history_record_info_obj = HistoryRecordInfo(
                 remover_source=agent_deleted_info.source_agent,
                 remove_info_time=agent_deleted_info.modification_date,
-                source_records=usage_records,
+                usage_records=usage_records,
             )
             # get record from history DB
             history_record_obj = await self.history_db_service.read_record(address_str)
