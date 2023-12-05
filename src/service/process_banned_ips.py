@@ -17,7 +17,7 @@ async def without_allowed_ips(
             for allowed_network in allowed_networks:
                 if address in allowed_network:
                     address_is_in_allowed_network = True
-                    logging.debug('Found banned %s in allowed network %s', address, allowed_network)
+                    logging.warning('Found banned %s in allowed network %s', address, allowed_network)
             if not address_is_in_allowed_network:
                 yield address
         await sleep(0)
