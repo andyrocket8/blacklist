@@ -10,7 +10,7 @@ from src.schemas.addresses_schemas import IpV4AddressList
 from src.schemas.common_response_schemas import AddResponseSchema
 from src.schemas.common_response_schemas import CountResponseSchema
 from src.schemas.common_response_schemas import DeleteResponseSchema
-from src.service.addresses_db_service import AllowedAddressesDBService
+from src.service.addresses_db_service import AllowedAddressesSetDBService
 from src.utils.router_utils import get_query_params
 
 api_router = APIRouter()
@@ -25,7 +25,7 @@ async def get_allowed_addresses(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     query_params: Annotated[dict, Depends(get_query_params)],
 ):
-    service_obj = AllowedAddressesDBService(redis_client_obj)
+    service_obj = AllowedAddressesSetDBService(redis_client_obj)
     return await service_obj.get_records(**query_params)
 
 
@@ -34,7 +34,7 @@ async def save_allowed_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
-    service_obj = AllowedAddressesDBService(redis_client_obj)
+    service_obj = AllowedAddressesSetDBService(redis_client_obj)
     added_count = await service_obj.write_records(agent_info.addresses)
     return AddResponseSchema(added=added_count)
 
@@ -44,7 +44,7 @@ async def delete_allowed_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
-    service_obj = AllowedAddressesDBService(redis_client_obj)
+    service_obj = AllowedAddressesSetDBService(redis_client_obj)
     deleted_count = await service_obj.del_records(agent_info.addresses)
     return DeleteResponseSchema(deleted=deleted_count)
 
@@ -53,6 +53,6 @@ async def delete_allowed_addresses(
 async def count_allowed_addresses(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
-    service_obj = AllowedAddressesDBService(redis_client_obj)
+    service_obj = AllowedAddressesSetDBService(redis_client_obj)
     count = await service_obj.count()
     return CountResponseSchema(count=count)

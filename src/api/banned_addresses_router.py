@@ -17,23 +17,23 @@ from src.schemas.addresses_schemas import IpV4AddressList
 from src.schemas.common_response_schemas import AddResponseSchema
 from src.schemas.common_response_schemas import CountResponseSchema
 from src.schemas.common_response_schemas import DeleteResponseSchema
-from src.service.addresses_db_service import AllowedAddressesDBService
-from src.service.addresses_db_service import BlackListAddressesDBService
-from src.service.networks_db_service import AllowedNetworksDBService
+from src.service.addresses_db_service import AllowedAddressesSetDBService
+from src.service.addresses_db_service import BlackListAddressesSetDBService
+from src.service.networks_db_service import AllowedNetworksSetDBService
 from src.service.process_banned_ips import without_allowed_ips
 
 api_router = APIRouter()
 
 
 async def get_banned_addresses(redis_client_obj: RedisAsyncio, query_params: dict[str, Any]) -> IpV4AddressList:
-    service_obj = BlackListAddressesDBService(redis_client_obj)
+    service_obj = BlackListAddressesSetDBService(redis_client_obj)
     filter_records = query_params.pop('filter_records')
     banned_records = await service_obj.get_records(**query_params)
     if filter_records:
         # filter by allowed IPs
-        allowed_service_obj = AllowedAddressesDBService(redis_client_obj)
+        allowed_service_obj = AllowedAddressesSetDBService(redis_client_obj)
         allowed_records = await allowed_service_obj.get_records(all_records=True)
-        allowed_net_service_obj = AllowedNetworksDBService(redis_client_obj)
+        allowed_net_service_obj = AllowedNetworksSetDBService(redis_client_obj)
         allowed_networks = await allowed_net_service_obj.get_records(all_records=True)
         return [x async for x in without_allowed_ips(banned_records, allowed_records, allowed_networks)]
     return banned_records
@@ -46,7 +46,7 @@ async def get_banned_addresses(redis_client_obj: RedisAsyncio, query_params: dic
 )
 async def banned_addresses_as_list(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
-    query_params: CommonQueryParams = Depends(CommonQueryParams),
+    query_params: Annotated[CommonQueryParams, Depends()],
 ):
     return await get_banned_addresses(redis_client_obj, asdict(query_params))
 
@@ -56,7 +56,7 @@ async def save_banned_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
-    service_obj = BlackListAddressesDBService(redis_client_obj)
+    service_obj = BlackListAddressesSetDBService(redis_client_obj)
     added_count = await service_obj.write_records(agent_info.addresses)
     return AddResponseSchema(added=added_count)
 
@@ -66,7 +66,7 @@ async def delete_banned_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
-    service_obj = BlackListAddressesDBService(redis_client_obj)
+    service_obj = BlackListAddressesSetDBService(redis_client_obj)
     deleted_count = await service_obj.del_records(agent_info.addresses)
     return DeleteResponseSchema(deleted=deleted_count)
 
@@ -75,7 +75,7 @@ async def delete_banned_addresses(
 async def count_banned_addresses(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
-    service_obj = BlackListAddressesDBService(redis_client_obj)
+    service_obj = BlackListAddressesSetDBService(redis_client_obj)
     count = await service_obj.count()
     return CountResponseSchema(count=count)
 
@@ -83,7 +83,7 @@ async def count_banned_addresses(
 @api_router.get('/download', summary='Get blacklisted addresses as a file')
 async def banned_addresses_as_file(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
-    query_params: DownloadQueryParams = Depends(DownloadQueryParams),
+    query_params: Annotated[DownloadQueryParams, Depends()],
 ):
     async def file_records(params: dict[str, Any]) -> AsyncGenerator[str, None]:
         for record in await get_banned_addresses(redis_client_obj, params):

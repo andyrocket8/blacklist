@@ -10,7 +10,7 @@ from src.schemas.common_response_schemas import CountResponseSchema
 from src.schemas.common_response_schemas import DeleteResponseSchema
 from src.schemas.network_schemas import AgentNetworkInfo
 from src.schemas.network_schemas import IPv4NetworkList
-from src.service.networks_db_service import AllowedNetworksDBService
+from src.service.networks_db_service import AllowedNetworksSetDBService
 from src.utils.router_utils import get_query_params
 
 api_router = APIRouter()
@@ -25,7 +25,7 @@ async def get_allowed_networks(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     query_params: Annotated[dict, Depends(get_query_params)],
 ):
-    service_obj = AllowedNetworksDBService(redis_client_obj)
+    service_obj = AllowedNetworksSetDBService(redis_client_obj)
     return await service_obj.get_records(**query_params)
 
 
@@ -34,7 +34,7 @@ async def save_allowed_networks(
     agent_info: AgentNetworkInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
-    service_obj = AllowedNetworksDBService(redis_client_obj)
+    service_obj = AllowedNetworksSetDBService(redis_client_obj)
     added_count = await service_obj.write_records(agent_info.networks)
     return AddResponseSchema(added=added_count)
 
@@ -44,7 +44,7 @@ async def delete_allowed_networks(
     agent_info: AgentNetworkInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
-    service_obj = AllowedNetworksDBService(redis_client_obj)
+    service_obj = AllowedNetworksSetDBService(redis_client_obj)
     deleted_count = await service_obj.del_records(agent_info.networks)
     return DeleteResponseSchema(deleted=deleted_count)
 
@@ -53,6 +53,6 @@ async def delete_allowed_networks(
 async def count_allowed_networks(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
-    service_obj = AllowedNetworksDBService(redis_client_obj)
+    service_obj = AllowedNetworksSetDBService(redis_client_obj)
     count = await service_obj.count()
     return CountResponseSchema(count=count)

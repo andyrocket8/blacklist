@@ -27,7 +27,7 @@ async def iter_over_records(iter_records: list[T]) -> AsyncGenerator[tuple[int, 
             flush_counter = 0
 
 
-class AbstractDBService(Generic[T]):
+class AbstractSetDBService(Generic[T]):
     """Serve operations with abstract classes in Redis database"""
 
     service_type: TypeT
@@ -104,3 +104,6 @@ class AbstractDBService(Generic[T]):
         set_id: str = str(self.set_id)
         logging.debug('Counting records in Redis database, set ID: %s', set_id)
         return await cast(Awaitable[Any], self.db.scard(set_id))
+
+
+AbstractSetDBServiceType = TypeVar('AbstractSetDBServiceType', bound=AbstractSetDBService)
