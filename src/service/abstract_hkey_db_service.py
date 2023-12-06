@@ -1,5 +1,6 @@
 import json
 from typing import Any
+from typing import AsyncGenerator
 from typing import Awaitable
 from typing import Generic
 from typing import Optional
@@ -38,4 +39,22 @@ class AbstractHkeyDBService(Generic[T, JE]):
         return None
 
     async def delete_record(self, record_id: str) -> int:
-        return await cast(Awaitable[Any], self.db.hdel(str(self.set_id), [record_id]))
+        return await self.delete_records([record_id])
+
+    async def delete_records(self, records: list[Any]) -> int:
+        return await cast(Awaitable[Any], self.db.hdel(str(self.set_id), *records))
+
+    async def get_records(
+        self, limit: int = 0, offset: int = 0, match: str = '*'
+    ) -> AsyncGenerator[tuple[T, str], None]:
+        if limit or offset:
+            # first get stored keys from hash (this can take a while)
+            keys: list[str] = [s for s in await cast(Awaitable[list[Any]], self.db.hkeys(str(self.set_id)))]
+            for key in keys[offset : offset + limit] if limit > 0 else keys[offset:]:
+                read_record = await self.read_record(key)
+                if read_record is not None:
+                    yield read_record, key
+        else:
+            async for data in self.db.hscan_iter(str(self.set_id), match=match, count=1):
+                json_data = json.loads(data[1])
+                yield self.service_type(**json_data), data[0]

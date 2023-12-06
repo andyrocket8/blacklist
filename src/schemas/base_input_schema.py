@@ -12,4 +12,4 @@ now_cur_tz = partial(datetime.datetime.now, tz=CUR_TZ)
 
 class BaseInputSchema(BaseModel):
     source_agent: str
-    modification_date: Annotated[datetime.datetime, Field(default_factory=now_cur_tz)]
+    action_time: Annotated[datetime.datetime, Field(default_factory=now_cur_tz)]

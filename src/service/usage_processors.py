@@ -2,9 +2,9 @@ import logging
 from typing import Optional
 
 from src.schemas.addresses_schemas import AgentAddressesInfo
-from src.schemas.usage_schemas import HistoryRecord
+from src.schemas.usage_schemas import ActionType
+from src.schemas.usage_schemas import AddressHistoryRecord
 from src.schemas.usage_schemas import HistoryRecordInfo
-from src.schemas.usage_schemas import SourceRecordInfo
 from src.schemas.usage_schemas import UsageRecord
 
 from .history_db_service import HistoryDBService
@@ -34,40 +34,15 @@ class UsageProcessor:
                     address,
                     agent_updated_info.source_agent,
                 )
-                usage_record = UsageRecord(
-                    last_usage_time=agent_updated_info.modification_date,
-                    source_records=[
-                        SourceRecordInfo(
-                            source=agent_updated_info.source_agent, last_info_time=agent_updated_info.modification_date
-                        )
-                    ],
-                )
+                usage_record = UsageRecord(last_usage_time=agent_updated_info.action_time)
             else:
-                usage_record.last_usage_time = agent_updated_info.modification_date
+                usage_record.last_usage_time = agent_updated_info.action_time
                 # iterate over records and update last usage for certain record
-                found: Optional[SourceRecordInfo] = None
-                for record in usage_record.source_records:
-                    if record.source == agent_updated_info.source_agent:
-                        found = record
-                        if agent_updated_info.modification_date > found.last_info_time:
-                            found.last_info_time = agent_updated_info.modification_date
-                        logging.debug(
-                            'Update usage statistics for address %s, existing agent %s info',
-                            address,
-                            agent_updated_info.source_agent,
-                        )
-                        break
-                if found is None:
-                    usage_record.source_records.append(
-                        SourceRecordInfo(
-                            source=agent_updated_info.source_agent, last_info_time=agent_updated_info.modification_date
-                        )
-                    )
-                    logging.debug(
-                        'Update usage statistics for address %s, new agent %s info',
-                        address,
-                        agent_updated_info.source_agent,
-                    )
+                logging.debug(
+                    'Update usage statistics for address %s, new agent %s info',
+                    address,
+                    agent_updated_info.source_agent,
+                )
 
             updated_records += await self.db_service.write_record(address_str, usage_record)
         return updated_records
@@ -82,52 +57,48 @@ class HistoryProcessor:
         self.usage_db_service = usage_db_service
         self.history_db_service = history_db_service
 
-    async def update_history(self, agent_deleted_info: AgentAddressesInfo) -> int:
+    async def update_history(self, agent_action_info: AgentAddressesInfo, action_type: ActionType) -> int:
         updated_records = 0
         logging.debug(
-            'Update history statistics for %s agent, records count: %d',
-            agent_deleted_info.source_agent,
-            len(agent_deleted_info.addresses),
+            'Update history statistics for %s agent, records count: %d, action type: %s',
+            agent_action_info.source_agent,
+            len(agent_action_info.addresses),
+            action_type,
         )
-        for address in agent_deleted_info.addresses:
+        for address in agent_action_info.addresses:
             address_str = str(address)
-            # get record from usage DB
-            address_usage_record = await self.usage_db_service.read_record(address_str)
-            usage_records: list[SourceRecordInfo] = []
-            if address_usage_record is not None:
-                logging.debug(
-                    'Use existing usage statistics for address %s, agent %s and '
-                    + 'will delete usage info for this address',
-                    address,
-                    agent_deleted_info.source_agent,
-                )
-                usage_records = address_usage_record.source_records
+            history_record_obj: Optional[AddressHistoryRecord] = await self.history_db_service.read_record(address_str)
+            action_time = agent_action_info.action_time
             history_record_info_obj = HistoryRecordInfo(
-                remover_source=agent_deleted_info.source_agent,
-                remove_info_time=agent_deleted_info.modification_date,
-                usage_records=usage_records,
+                source=agent_action_info.source_agent, action_time=action_time, action_type=action_type
             )
-            # get record from history DB
-            history_record_obj = await self.history_db_service.read_record(address_str)
             if history_record_obj is None:
-                logging.debug('Empty history for address %s - create new record', address)
-                history_record_obj = HistoryRecord(
-                    last_update_time=agent_deleted_info.modification_date, history_records=[history_record_info_obj]
+                logging.debug('Create usage statistics for address %s', address)
+                history_record_obj = AddressHistoryRecord(
+                    address=address_str, last_update_time=action_time, history_records=[history_record_info_obj]
                 )
             else:
-                logging.debug(
-                    'Update history for address %s, deleted by agent: %s ', address, agent_deleted_info.source_agent
-                )
+                logging.debug('Update existing statistics for address %s', address)
+                if action_time > history_record_obj.last_update_time:
+                    history_record_obj.last_update_time = action_time
+                # append record in history_records
                 history_record_obj.history_records.append(history_record_info_obj)
-                history_record_obj.last_update_time = agent_deleted_info.modification_date
+                history_record_obj.sort()
+                logging.debug(
+                    'Statistics for address %s consists now of %d records',
+                    address,
+                    len(history_record_obj.history_records),
+                )
+            # commit changes to history db
             updated_records += await self.history_db_service.write_record(address_str, history_record_obj)
-            # delete usage record data
-            if len(usage_records):
+            # delete usage record if last operation was deletion
+            actions_len = len(history_record_obj.history_records)
+            last_action_type = history_record_obj.history_records[actions_len - 1].action_type
+            if last_action_type == ActionType.remove_action:
                 logging.debug(
                     'Delete usage info for address %s, agent %s',
                     address,
-                    agent_deleted_info.source_agent,
+                    agent_action_info.source_agent,
                 )
                 await self.usage_db_service.delete_record(address_str)
-
         return updated_records

@@ -21,6 +21,7 @@ from src.schemas.addresses_schemas import IpV4AddressList
 from src.schemas.common_response_schemas import AddResponseSchema
 from src.schemas.common_response_schemas import CountResponseSchema
 from src.schemas.common_response_schemas import DeleteResponseSchema
+from src.schemas.usage_schemas import ActionType
 from src.service.addresses_db_service import AllowedAddressesSetDBService
 from src.service.addresses_db_service import BlackListAddressesSetDBService
 from src.service.history_db_service import HistoryDBService
@@ -28,6 +29,7 @@ from src.service.networks_db_service import AllowedNetworksSetDBService
 from src.service.process_banned_ips import without_allowed_ips
 from src.service.usage_db_service import UsageDBService
 from src.tasks.history_update_bg_task import update_history_bg_task
+from src.tasks.usage_update_bg_task import update_usage_bg_task
 
 api_router = APIRouter()
 
@@ -62,9 +64,19 @@ async def banned_addresses_as_list(
 async def save_banned_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
+    background_tasks: BackgroundTasks,
 ):
     service_obj = BlackListAddressesSetDBService(redis_client_obj)
     added_count = await service_obj.write_records(agent_info.addresses)
+    if len(agent_info.addresses) <= BACKGROUND_DELETE_RECORDS:
+        usage_db_service = UsageDBService(redis_client_obj, ACTIVE_USAGE_INFO)
+        history_db_service = HistoryDBService(redis_client_obj, HISTORY_USAGE_INFO)
+        # Update usage information
+        background_tasks.add_task(update_usage_bg_task, usage_db_service, agent_info)
+        # Update history information
+        background_tasks.add_task(
+            update_history_bg_task, usage_db_service, history_db_service, agent_info, ActionType.add_action
+        )
     return AddResponseSchema(added=added_count)
 
 
@@ -80,7 +92,9 @@ async def delete_banned_addresses(
         usage_db_service = UsageDBService(redis_client_obj, ACTIVE_USAGE_INFO)
         history_db_service = HistoryDBService(redis_client_obj, HISTORY_USAGE_INFO)
 
-        background_tasks.add_task(update_history_bg_task, usage_db_service, history_db_service, agent_info)
+        background_tasks.add_task(
+            update_history_bg_task, usage_db_service, history_db_service, agent_info, ActionType.remove_action
+        )
     return DeleteResponseSchema(deleted=deleted_count)
 
 

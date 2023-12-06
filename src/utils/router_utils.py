@@ -18,3 +18,8 @@ def get_query_params_for_download(
     result = get_query_params_with_filter(records_count, all_records, filter_records)
     result['filename'] = filename
     return result
+
+
+def get_query_params_with_offset(records_count: int = 10, all_records: bool = False, offset: int = 0):
+    """Common query params with offset"""
+    return {'records_count': records_count, 'all_records': all_records, 'offset': offset}

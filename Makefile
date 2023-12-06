@@ -19,6 +19,9 @@ _test:
 _start_redis:
 		echo "set -a && source compose-redis.env && docker compose up -d" | bash
 
+_stop_redis:
+		echo "set -a && source compose-redis.env && docker compose down" | bash
+
 build:
 		$(MAKE) _builder
 
@@ -31,3 +34,6 @@ clean_build:
 
 start_redis:
 		$(MAKE) _start_redis
+
+stop_redis:
+		$(MAKE) _stop_redis

@@ -1,4 +1,6 @@
 import datetime
+from enum import Enum
+from ipaddress import IPv4Address
 from json import JSONEncoder
 from typing import Annotated
 
@@ -8,27 +10,36 @@ from pydantic import Field
 from .base_input_schema import now_cur_tz
 
 
-class SourceRecordInfo(BaseModel):
-    source: str
-    last_info_time: Annotated[datetime.datetime, Field(default_factory=now_cur_tz)]
+class ActionType(str, Enum):
+    add_action = 'add'
+    remove_action = 'remove'
 
 
 class UsageRecord(BaseModel):
-    """Usage record for analysis and retention of old records"""
+    """Usage record for analysis and retention of old records
+    Use address as a key in HKEY Redis record
+    """
 
     last_usage_time: Annotated[datetime.datetime, Field(default_factory=now_cur_tz)]
-    source_records: Annotated[list[SourceRecordInfo], Field(default_factory=list)]
 
 
 class HistoryRecordInfo(BaseModel):
-    remover_source: str
-    remove_info_time: Annotated[datetime.datetime, Field(default_factory=now_cur_tz)]
-    usage_records: list[SourceRecordInfo]
+    source: str
+    action_time: Annotated[datetime.datetime, Field(default_factory=now_cur_tz)]
+    action_type: ActionType
 
 
 class HistoryRecord(BaseModel):
     last_update_time: Annotated[datetime.datetime, Field(default_factory=now_cur_tz)]
     history_records: Annotated[list[HistoryRecordInfo], Field(default_factory=list)]
+
+    def sort(self):
+        """Sorting the contents of history"""
+        self.history_records.sort(key=lambda x: x.action_time)
+
+
+class AddressHistoryRecord(HistoryRecord):
+    address: IPv4Address
 
 
 class UsageClassesEncoder(JSONEncoder):
@@ -40,16 +51,12 @@ class UsageClassesEncoder(JSONEncoder):
             return o.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
         class_name = o.__class__.__name__
         if class_name == 'UsageRecord':
-            return {'last_usage_time': o.last_usage_time, 'source_records': o.source_records}
-        if class_name == 'SourceRecordInfo':
-            return {'last_info_time': o.last_info_time, 'source': o.source}
+            return o.model_dump(mode='json')
         if class_name == 'HistoryRecordInfo':
-            return {
-                'remover_source': o.remover_source,
-                'remove_info_time': o.remove_info_time,
-                'usage_records': o.usage_records,
-            }
+            return o.model_dump(mode='json')
         if class_name == 'HistoryRecord':
-            return {'last_update_time': o.last_update_time, 'history_records': o.history_records}
+            return o.model_dump(mode='json')
+        if class_name == 'AddressHistoryRecord':
+            return o.model_dump(mode='json')
 
         return JSONEncoder.default(self, o)
