@@ -10,6 +10,7 @@ from fastapi import Depends
 from fastapi.responses import StreamingResponse
 
 from src.core.settings import ACTIVE_USAGE_INFO
+from src.core.settings import BACKGROUND_ADD_RECORDS
 from src.core.settings import BACKGROUND_DELETE_RECORDS
 from src.core.settings import HISTORY_USAGE_INFO
 from src.db.redis_db import RedisAsyncio
@@ -28,6 +29,8 @@ from src.service.history_db_service import HistoryDBService
 from src.service.networks_db_service import AllowedNetworksSetDBService
 from src.service.process_banned_ips import without_allowed_ips
 from src.service.usage_db_service import UsageDBService
+from src.tasks.celery_tasks import celery_update_history_task
+from src.tasks.celery_tasks import celery_update_usage_info_task
 from src.tasks.history_update_bg_task import update_history_bg_task
 from src.tasks.usage_update_bg_task import update_usage_bg_task
 
@@ -68,7 +71,8 @@ async def save_banned_addresses(
 ):
     service_obj = BlackListAddressesSetDBService(redis_client_obj)
     added_count = await service_obj.write_records(agent_info.addresses)
-    if len(agent_info.addresses) <= BACKGROUND_DELETE_RECORDS:
+    if len(agent_info.addresses) <= BACKGROUND_ADD_RECORDS:
+        # run fast tasks in background
         usage_db_service = UsageDBService(redis_client_obj, ACTIVE_USAGE_INFO)
         history_db_service = HistoryDBService(redis_client_obj, HISTORY_USAGE_INFO)
         # Update usage information
@@ -77,6 +81,17 @@ async def save_banned_addresses(
         background_tasks.add_task(
             update_history_bg_task, usage_db_service, history_db_service, agent_info, ActionType.add_action
         )
+    else:
+        # invoke celery task for update usage and history
+        agent_info_dict = agent_info.encode()
+        celery_update_usage_info_task.apply_async((agent_info_dict,))
+        celery_update_history_task.apply_async(
+            (
+                agent_info_dict,
+                ActionType.add_action,
+            )
+        )
+
     return AddResponseSchema(added=added_count)
 
 
@@ -95,6 +110,11 @@ async def delete_banned_addresses(
         background_tasks.add_task(
             update_history_bg_task, usage_db_service, history_db_service, agent_info, ActionType.remove_action
         )
+    else:
+        # invoke celery task for update usage
+        agent_info_dict = agent_info.encode()
+        celery_update_history_task.apply_async(agent_info_dict, ActionType.remove_action)
+
     return DeleteResponseSchema(deleted=deleted_count)
 
 

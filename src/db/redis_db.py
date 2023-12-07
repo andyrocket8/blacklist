@@ -1,5 +1,6 @@
 # Redis database connector classes
 import logging
+from contextlib import asynccontextmanager
 from typing import Any
 from typing import AsyncGenerator
 
@@ -21,8 +22,7 @@ class RedisConnectionPool:
             kwargs['password'] = application_settings.redis_password
         logging.debug('Creating redis connection pool')
         self.connection_pool: ConnectionPool = ConnectionPool.from_url(
-            f'redis://{application_settings.redis_host}:{application_settings.redis_port}'
-            f'?db={application_settings.redis_db}',
+            application_settings.get_redis_uri(),
             **kwargs,
         )
 
@@ -47,3 +47,15 @@ async def redis_client() -> AsyncGenerator[RedisAsyncio, None]:
         if client.connection or client.connection_pool:
             logging.debug('Closing redis client connection')
             await client.aclose()
+
+
+@asynccontextmanager
+async def context_celery_redis_client() -> AsyncGenerator[RedisAsyncio, None]:
+    """Connection manager for celery jobs"""
+    client = RedisAsyncio.from_pool(connection_pool_obj.connection_pool)
+    logging.debug('Obtaining redis client connection for celery job')
+    try:
+        yield client
+    finally:
+        logging.debug('Closing redis client connection for celery job')
+        await client.aclose()

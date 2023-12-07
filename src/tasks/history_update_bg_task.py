@@ -11,5 +11,6 @@ async def update_history_bg_task(
     agent_info: AgentAddressesInfo,
     action_type: ActionType,
 ):
+    """Task invoked with background task in handle. Update history of adding and deletion of banned addresses"""
     history_processor_obj = HistoryProcessor(usage_db_service, history_db_service)
     await history_processor_obj.update_history(agent_info, action_type)

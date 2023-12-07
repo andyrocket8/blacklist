@@ -23,6 +23,7 @@ flake8-builtins = "^2.2.0"
 flake8-quotes = "^3.3.2"
 pytest = "^7.4.3"
 pytest-asyncio = "^0.23.2"
+celery = "^5.3.6"
 
 
 [tool.poetry.group.dev.dependencies]

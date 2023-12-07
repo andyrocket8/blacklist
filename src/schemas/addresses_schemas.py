@@ -1,4 +1,6 @@
 """Schemas for addresses (blacklisted or allowed)"""
+
+import datetime
 from ipaddress import IPv4Address
 from json import JSONEncoder
 
@@ -14,6 +16,20 @@ class IpAddressEncoder(JSONEncoder):
     def default(self, o):
         if type(o) is IPv4Address:
             return str(o)
+        if type(o) is datetime.datetime:
+            return o.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+
+        return JSONEncoder.default(self, o)
+
+
+class AgentAddressesInfoEncoder(JSONEncoder):
+    def default(self, o):
+        if type(o) is IPv4Address:
+            return str(o)
+        if type(o) is datetime.datetime:
+            return o.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+        if o.__class__.__name__ == 'AgentAddressesInfo':
+            return o.model_dump(mode='json')
 
         return JSONEncoder.default(self, o)
 
@@ -22,3 +38,6 @@ class AgentAddressesInfo(BaseInputSchema):
     """Information about addresses from agent"""
 
     addresses: IpV4AddressList
+
+    def encode(self):
+        return self.model_dump(mode='json')

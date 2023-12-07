@@ -29,6 +29,12 @@ class AppSettings(BaseSettings):
     class Config:
         env_file = '.env'
 
+    def get_redis_uri(self):
+        return f'redis://{self.redis_host}:{self.redis_port}?db={self.redis_db}'
+
+    def get_redis_uri_for_celery(self):
+        return f'redis://{self.redis_host}:{self.redis_port}/{self.redis_db}'
+
 
 # Application settings from .env file
 app_settings = AppSettings()
