@@ -73,19 +73,19 @@ class HistoryProcessor:
                 source=agent_action_info.source_agent, action_time=action_time, action_type=action_type
             )
             if history_record_obj is None:
-                logging.debug('Create usage statistics for address %s', address)
+                logging.debug('Create history statistics for address %s', address)
                 history_record_obj = AddressHistoryRecord(
                     address=address_str, last_update_time=action_time, history_records=[history_record_info_obj]
                 )
             else:
-                logging.debug('Update existing statistics for address %s', address)
+                logging.debug('Update existing history statistics for address %s', address)
                 if action_time > history_record_obj.last_update_time:
                     history_record_obj.last_update_time = action_time
                 # append record in history_records
                 history_record_obj.history_records.append(history_record_info_obj)
                 history_record_obj.sort()
                 logging.debug(
-                    'Statistics for address %s consists now of %d records',
+                    'History statistics for address %s consists now of %d records',
                     address,
                     len(history_record_obj.history_records),
                 )

@@ -22,6 +22,9 @@ _start_redis:
 _stop_redis:
 		echo "set -a && source compose-redis.env && docker compose down" | bash
 
+_start_celery:
+		echo "celery -A src.celery_app worker -l DEBUG" | bash
+
 build:
 		$(MAKE) _builder
 
@@ -37,3 +40,7 @@ start_redis:
 
 stop_redis:
 		$(MAKE) _stop_redis
+
+
+start_celery:
+		$(MAKE) _start_celery &
