@@ -1,6 +1,6 @@
 # Blacklist Project
 ## Intention
-Blacklist is a tool for gathering and publish information about malicious IP addresses i.e. addresses whish used by attackers for various bad actions: IP flooding, brut force attacks etc.
+Blacklist is a tool for gathering and publish information about malicious IP addresses i.e. addresses used by attackers for various bad actions: IP flooding, brut force attacks etc.
 
 Published lists can be used in network devices for blocking access to published IP addresses
 

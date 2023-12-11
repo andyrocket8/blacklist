@@ -4,9 +4,10 @@ version = "0.1.0"
 description = ""
 authors = ["Dmitriev Andrey <dmitriev.andrey@customscard.ru>"]
 readme = "README.md"
+packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11,<3.12"
 fastapi = "^0.104.1"
 flake8 = "^6.1.0"
 mypy = "^1.7.1"
@@ -24,7 +25,6 @@ flake8-quotes = "^3.3.2"
 pytest = "^7.4.3"
 pytest-asyncio = "^0.23.2"
 celery = "^5.3.6"
-
 
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"

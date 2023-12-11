@@ -16,6 +16,7 @@ BASE_DIR: Path = Path(os_path.dirname(os_path.dirname(os_path.abspath(__file__))
 class AppSettings(BaseSettings):
     host: str = 'localhost'  # application host
     port: int = 8000  # application port
+    root_path: str = '/'  # root path for ASGI application (proxy prefix)
     app_title: str = 'Black list processor'  # application title
     use_redis_storage: bool = True  # use Redis database for storing black lists
     redis_host: str = 'localhost'  # redis host
