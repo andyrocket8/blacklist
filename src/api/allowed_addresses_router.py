@@ -17,7 +17,7 @@ api_router = APIRouter()
 
 
 @api_router.get(
-    '/',
+    '',
     summary='Retrieve allowed addresses from storage (all or partial)',
     response_model=IpV4AddressList,
 )
@@ -29,7 +29,7 @@ async def get_allowed_addresses(
     return await service_obj.get_records(**query_params)
 
 
-@api_router.post('/', summary='Add allowed addresses to storage', response_model=AddResponseSchema)
+@api_router.post('', summary='Add allowed addresses to storage', response_model=AddResponseSchema)
 async def save_allowed_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
@@ -39,7 +39,7 @@ async def save_allowed_addresses(
     return AddResponseSchema(added=added_count)
 
 
-@api_router.delete('/', summary='Delete allowed addresses from storage', response_model=DeleteResponseSchema)
+@api_router.delete('', summary='Delete allowed addresses from storage', response_model=DeleteResponseSchema)
 async def delete_allowed_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],

@@ -1,26 +1,47 @@
-# Compose file for local development
+# all-in-one docker compose
+
 services:
   redis:
     image: redis:7.2.3-alpine3.18
     volumes:
       - redis_data:/data
-    network_mode: host
     env_file:
       - ./compose-redis.env
-    ports:
-      - "6379:${REDIS_PORT}"
 
-  # app:
-  #  build:
-  #    dockerfile: ./src/Dockerfile
-  #  depends_on:
-  #    redis:
-  #      condition: "service_started"
-  #    db:
-  #      condition: "service_healthy"
-  #  network_mode: host
-  #  ports:
-  #    - 8000:8000
+  app:
+    build:
+      dockerfile: ./src/Dockerfile
+      target: base-app
+    volumes:
+      - ${ENV_FILE}:/app/.env
+    depends_on:
+      redis:
+        condition: "service_started"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl app:8000/ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app-celery:
+    build:
+      dockerfile: ./src/Dockerfile
+      target: celery-app
+    volumes:
+      - ${ENV_FILE}:/app/.env
+    depends_on:
+      redis:
+        condition: "service_started"
+
+  nginx:
+    build:
+      dockerfile: ./services/nginx/Dockerfile
+    depends_on:
+      app:
+          condition: "service_healthy"
+    ports:
+      - 8000:8000
+
 
 volumes:
   redis_data:

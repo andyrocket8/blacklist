@@ -20,7 +20,7 @@ from src.utils.time_utils import get_timedelta_for_history_query
 api_router = APIRouter()
 
 
-@api_router.get('/', response_model=list[AddressHistoryRecord])
+@api_router.get('', response_model=list[AddressHistoryRecord])
 async def get_history(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     query_params: Annotated[HistoryQueryParams, Depends()],
