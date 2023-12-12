@@ -8,8 +8,6 @@ services:
     network_mode: host
     env_file:
       - ./compose-redis.env
-    ports:
-      - "6379:${REDIS_PORT}"
 
   # app:
   #  build:
