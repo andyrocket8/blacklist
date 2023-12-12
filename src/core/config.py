@@ -22,10 +22,12 @@ class AppSettings(BaseSettings):
     redis_host: str = 'localhost'  # redis host
     redis_port: int = 6379  # redis port
     redis_db: int = 0  # redis DB number
-    redis_use_authentication: bool = False
+    # TODO add redis authentication
+    redis_use_authentication: bool = False  # Not implemented yet!
     redis_username: str = ''  # redis authentication username
     redis_password: str = ''  # redis authentication password
     show_openapi: bool = True  # if you want to hide API docs set False here
+    use_authorization: bool = False  # set True to use method authorization with tokens
 
     class Config:
         env_file = '.env'

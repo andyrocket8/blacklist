@@ -2,12 +2,14 @@ from dataclasses import asdict
 from typing import Annotated
 from typing import Any
 from typing import AsyncGenerator
+from typing import Optional
 from urllib.parse import quote
 
 from fastapi import APIRouter
 from fastapi import BackgroundTasks
 from fastapi import Depends
 from fastapi.responses import StreamingResponse
+from fastapi.security import HTTPAuthorizationCredentials
 
 from src.core.settings import ACTIVE_USAGE_INFO
 from src.core.settings import BACKGROUND_ADD_RECORDS
@@ -34,7 +36,10 @@ from src.tasks.celery_tasks import celery_update_usage_info_task
 from src.tasks.history_update_bg_task import update_history_bg_task
 from src.tasks.usage_update_bg_task import update_usage_bg_task
 
+from .http_auth_wrapper import get_proc_auth_checker
+
 api_router = APIRouter()
+banned_addresses_auth_check = get_proc_auth_checker(need_admin_permission=False)
 
 
 async def get_banned_addresses(redis_client_obj: RedisAsyncio, query_params: dict[str, Any]) -> IpV4AddressList:
@@ -68,6 +73,7 @@ async def save_banned_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     background_tasks: BackgroundTasks,
+    auth: Optional[HTTPAuthorizationCredentials] = Depends(banned_addresses_auth_check),  # noqa: B008
 ):
     service_obj = BlackListAddressesSetDBService(redis_client_obj)
     added_count = await service_obj.write_records(agent_info.addresses)
@@ -100,6 +106,7 @@ async def delete_banned_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     background_tasks: BackgroundTasks,
+    auth: Optional[HTTPAuthorizationCredentials] = Depends(banned_addresses_auth_check),  # noqa: B008
 ):
     service_obj = BlackListAddressesSetDBService(redis_client_obj)
     deleted_count = await service_obj.del_records(agent_info.addresses)

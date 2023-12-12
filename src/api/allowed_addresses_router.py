@@ -1,7 +1,10 @@
 from typing import Annotated
+from typing import Callable
+from typing import Optional
 
 from fastapi import APIRouter
 from fastapi import Depends
+from fastapi.security import HTTPAuthorizationCredentials
 
 from src.db.redis_db import RedisAsyncio
 from src.db.redis_db import redis_client
@@ -13,7 +16,10 @@ from src.schemas.common_response_schemas import DeleteResponseSchema
 from src.service.addresses_db_service import AllowedAddressesSetDBService
 from src.utils.router_utils import get_query_params
 
+from .http_auth_wrapper import get_proc_auth_checker
+
 api_router = APIRouter()
+allowed_addresses_auth_check: Callable = get_proc_auth_checker(need_admin_permission=False)
 
 
 @api_router.get(
@@ -33,6 +39,7 @@ async def get_allowed_addresses(
 async def save_allowed_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
+    auth: Optional[HTTPAuthorizationCredentials] = Depends(allowed_addresses_auth_check),  # noqa: B008
 ):
     service_obj = AllowedAddressesSetDBService(redis_client_obj)
     added_count = await service_obj.write_records(agent_info.addresses)
@@ -43,6 +50,7 @@ async def save_allowed_addresses(
 async def delete_allowed_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
+    auth: Optional[HTTPAuthorizationCredentials] = Depends(allowed_addresses_auth_check),  # noqa: B008
 ):
     service_obj = AllowedAddressesSetDBService(redis_client_obj)
     deleted_count = await service_obj.del_records(agent_info.addresses)
