@@ -35,7 +35,7 @@ async def get_allowed_networks(
     return await service_obj.get_records(**query_params)
 
 
-@api_router.post('', summary='Add allowed networks to storage', response_model=AddResponseSchema)
+@api_router.post('/add', summary='Add allowed networks to storage', response_model=AddResponseSchema)
 async def save_allowed_networks(
     agent_info: AgentNetworkInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
@@ -46,7 +46,7 @@ async def save_allowed_networks(
     return AddResponseSchema(added=added_count)
 
 
-@api_router.delete('', summary='Delete allowed networks from storage', response_model=DeleteResponseSchema)
+@api_router.post('/delete', summary='Delete allowed networks from storage', response_model=DeleteResponseSchema)
 async def delete_allowed_networks(
     agent_info: AgentNetworkInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],

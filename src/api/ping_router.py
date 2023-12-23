@@ -11,7 +11,7 @@ from src.schemas.ping_schemas import PingResponse
 api_router = APIRouter()
 
 
-@api_router.get('/', response_model=PingResponse)
+@api_router.get('', response_model=PingResponse)
 async def ping(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
