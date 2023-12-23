@@ -68,7 +68,7 @@ async def banned_addresses_as_list(
     return await get_banned_addresses(redis_client_obj, asdict(query_params))
 
 
-@api_router.post('', summary='Add blacklisted addresses to storage', response_model=AddResponseSchema)
+@api_router.post('/add', summary='Add blacklisted addresses to storage', response_model=AddResponseSchema)
 async def save_banned_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
@@ -101,7 +101,7 @@ async def save_banned_addresses(
     return AddResponseSchema(added=added_count)
 
 
-@api_router.delete('', summary='Delete blacklisted addresses from storage', response_model=DeleteResponseSchema)
+@api_router.post('/delete', summary='Delete blacklisted addresses from storage', response_model=DeleteResponseSchema)
 async def delete_banned_addresses(
     agent_info: AgentAddressesInfo,
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
