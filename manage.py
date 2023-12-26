@@ -60,10 +60,15 @@ def main(args: list[str]):
         metavar='[UUID value]',
     )
     parsed_args = vars(parser.parse_args(args))
-    admin_token: Optional[uuid.UUID] = parsed_args['admin']
-    agent_token: Optional[uuid.UUID] = parsed_args['agent']
-    if admin_token or agent_token:
-        process_tokens(admin_token, agent_token)
+    if parsed_args:
+        admin_token: Optional[uuid.UUID] = parsed_args['admin']
+        agent_token: Optional[uuid.UUID] = parsed_args['agent']
+        if admin_token or agent_token:
+            process_tokens(admin_token, agent_token)
+        else:
+            parser.error('No tokens options (--admin, --agent) specified. Use at least one of them')
+    else:
+        parser.error('No options specified. Use --help for list of available options')
 
 
 if __name__ == '__main__':

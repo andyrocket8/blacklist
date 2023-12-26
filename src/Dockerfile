@@ -23,6 +23,8 @@ WORKDIR /app
 
 COPY --from=builder /app /app
 COPY src /app/src
+COPY manage.py /app/
+COPY setup.cfg /app/
 
 RUN apk --update add curl
 

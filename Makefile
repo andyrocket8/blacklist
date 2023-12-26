@@ -4,17 +4,17 @@ _BUILD_ARGS_RELEASE_TAG ?= latest
 _BUILD_ARGS_DOCKERFILE ?= ./src/Dockerfile
 
 _builder:
-		docker build -t ${_BUILD_ARGS_IMAGE_NAME} -f ${_BUILD_ARGS_DOCKERFILE} .
+		docker build -t ${_BUILD_ARGS_IMAGE_NAME} -f ${_BUILD_ARGS_DOCKERFILE} . --target base-app
 
 _clean_builder:
 		rm -f ./src/.mypy_cache
-		docker build -t ${_BUILD_ARGS_IMAGE_NAME} --no-cache -f ${_BUILD_ARGS_DOCKERFILE} .
+		docker build -t ${_BUILD_ARGS_IMAGE_NAME} --no-cache -f ${_BUILD_ARGS_DOCKERFILE} . --target base-app
 
 _test:
-		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "flake8 -v --config setup.cfg"
-		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "mypy src"
-		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "black"
-		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "pytest"
+		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "source .venv/bin/activate && flake8 -v --config setup.cfg"
+		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "source .venv/bin/activate && mypy src"
+		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "source .venv/bin/activate && black ."
+		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "source .venv/bin/activate && pytest"
 
 _start_dev:
 		echo "set -a && source compose-redis.env && docker compose -f docker-compose-dev.yml up -d" | bash
