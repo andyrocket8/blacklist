@@ -16,6 +16,13 @@ _test:
 		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "source .venv/bin/activate && black ."
 		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "source .venv/bin/activate && pytest"
 
+_check:
+		isort .
+		flake8 -v --config setup.cfg
+		mypy src
+		black .
+		pytest
+
 _start_dev:
 		echo "set -a && source compose-redis.env && docker compose -f docker-compose-dev.yml up -d" | bash
 
@@ -34,6 +41,8 @@ _start_celery:
 build:
 		$(MAKE) _builder
 
+check:
+		$(MAKE) _check
 test:
 		$(MAKE) _test
 

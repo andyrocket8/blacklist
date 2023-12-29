@@ -1,6 +1,7 @@
 from logging import config as logging_config
 from os import path as os_path
 from pathlib import Path
+from typing import Optional
 
 from pydantic_settings import BaseSettings
 
@@ -28,6 +29,8 @@ class AppSettings(BaseSettings):
     redis_password: str = ''  # redis authentication password
     show_openapi: bool = True  # if you want to hide API docs set False here
     use_authorization: bool = False  # set True to use method authorization with tokens
+    # Max entries in address change history. <None> for no limits in history depth, 0 - no history at all
+    history_depth: Optional[int] = None
 
     class Config:
         env_file = '.env'

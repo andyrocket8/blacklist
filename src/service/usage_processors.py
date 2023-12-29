@@ -1,11 +1,13 @@
 import logging
 from typing import Optional
 
+from src.core.config import app_settings
 from src.schemas.addresses_schemas import AgentAddressesInfo
 from src.schemas.usage_schemas import ActionType
 from src.schemas.usage_schemas import AddressHistoryRecord
 from src.schemas.usage_schemas import HistoryRecordInfo
 from src.schemas.usage_schemas import UsageRecord
+from src.utils import crop_list_tail
 
 from .history_db_service import HistoryDBService
 from .usage_db_service import UsageDBService
@@ -75,20 +77,28 @@ class HistoryProcessor:
             if history_record_obj is None:
                 logging.debug('Create history statistics for address %s', address)
                 history_record_obj = AddressHistoryRecord(
-                    address=address_str, last_update_time=action_time, history_records=[history_record_info_obj]
+                    address=address_str,
+                    last_update_time=action_time,
+                    history_records=crop_list_tail([history_record_info_obj], app_settings.history_depth),
                 )
             else:
                 logging.debug('Update existing history statistics for address %s', address)
                 if action_time > history_record_obj.last_update_time:
                     history_record_obj.last_update_time = action_time
-                # append record in history_records
-                history_record_obj.history_records.append(history_record_info_obj)
-                history_record_obj.sort()
-                logging.debug(
-                    'History statistics for address %s consists now of %d records',
-                    address,
-                    len(history_record_obj.history_records),
-                )
+                if app_settings.history_depth is not None:
+                    # append record in history_records
+                    history_record_obj.history_records.append(history_record_info_obj)
+                    history_record_obj.sort()
+                    history_record_obj.history_records = crop_list_tail(
+                        history_record_obj.history_records, app_settings.history_depth
+                    )
+                    logging.debug(
+                        'History statistics for address %s consists now of %d records',
+                        address,
+                        len(history_record_obj.history_records),
+                    )
+                else:
+                    history_record_obj.history_records = []
             # commit changes to history db
             updated_records += await self.history_db_service.write_record(address_str, history_record_obj)
             # delete usage record if last operation was deletion
