@@ -9,7 +9,7 @@ class Version:
 
 
 # Change application version here
-VERSION = {'major': 1, 'minor': 0, 'patch': 0}
+VERSION = {'major': 1, 'minor': 0, 'patch': 1}
 
 VERSION_INFO = Version(**VERSION)
 
