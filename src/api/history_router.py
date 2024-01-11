@@ -45,6 +45,6 @@ async def get_history_by_address(
 ):
     history_db_srv_obj = HistoryDBService(redis_client_obj)
     history_record_obj = await history_db_srv_obj.read_record(str(address_id))
-    if history_db_srv_obj is None:
+    if history_record_obj is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f'History for address {address_id} is not found')
     return history_record_obj
