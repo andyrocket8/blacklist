@@ -19,16 +19,21 @@ Language - Python 3.11
 * Background tasks - Celery
 * Balancer - NGINX
 
+### Example architecture with Fail2Ban source IP address info
+IP Addresses information is gathered with blacklist-watcher application (https://github.com/andyrocket8/blacklist_watcher).
+Banned IPs are pushed with external script or by router blacklisting feature (API call /addresses/banned/download)
+![Blacklist architecture.png](Blacklist%20Architecture.png)
 
 ## Methods reference
 Have a look on API methods with swagger URI (/api/openapi)
 
 ## OpenAPI description
-You can publish API description based on OpenAPI (Swagger interface). Swagger URI is /api/openapi suffix after base service URI
+You can publish API description based on OpenAPI (Swagger interface). Swagger URI is /api/openapi suffix after base service URI.
 If you want to hide OpenAPI interface please use **SHOW_OPENAPI=false** in project .env file
 
 ## Securing application
-Some methods changing database contents (.../add, .../delete) can be secured with API tokens
+Some methods changing database contents (.../add, .../delete) can be secured with API tokens.
+
 Use **USE_AUTHORIZATION=true** option in .env file for securing your installation.
 Tokens should also be created with **manage.py** script (see description below in **Deployment** section)
 
@@ -73,3 +78,18 @@ Example
 source .venv/bin/activate
 python manage.py --admin <some UUID value>
 ```
+
+## Configuration
+Configuration file for Blacklist installation implemented by ENV file.
+Default ENV file name is .env
+Description of ENV file entries is in /src/core/config.py
+
+Attention: lower cased names in config.py actually included in ENV file upper cased, i.e. redis_password should be REDIS_PASSWORD
+
+### Configuration boundaries
+1) Redis authentication is not yet implemented hence REDIS_USE_AUTHENTICATION and followed REDIS_USERNAME, REDIS_PASSWORD have no effect
+
+Issue for implementation: - [ ] https://github.com/andyrocket8/blacklist/issues/14
+
+## Custom logging
+Custom logging available by substitution of /src/core/logger.py file. Use dictionary logging config feature (https://docs.python.org/3/library/logging.config.html)
