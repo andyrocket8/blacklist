@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "blacklist"
-version = "1.0.2"
+version = "1.0.3"
 description = ""
 authors = ["Dmitriev Andrey <dmitriev.andrey@customscard.ru>"]
 readme = "README.md"
