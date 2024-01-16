@@ -11,7 +11,15 @@ class CommonQueryParams:
 
 
 @dataclass
-class DownloadQueryParams(CommonQueryParams):
+class DownloadBlackListQueryParams(CommonQueryParams):
+    filename: str = Query('', description='Set filename to download as file', example='text.txt')
+
+
+@dataclass
+class DownloadWhitelistQueryParams:
+    records_count: int = Query(10, description='Number of records to return. Omitted if all_records == true')
+    all_records: bool = Query(False, description='Return all records')
+    with_networks: bool = Query(True, description='Add allowed networks in donwload set')
     filename: str = Query('', description='Set filename to download as file', example='text.txt')
 
 

@@ -11,7 +11,7 @@ from fastapi.responses import StreamingResponse
 
 from src.db.redis_db import RedisAsyncio
 from src.db.redis_db import redis_client
-from src.models.query_params_models import DownloadQueryParams
+from src.models.query_params_models import DownloadBlackListQueryParams
 
 from .banned_addresses_router import get_banned_addresses
 
@@ -21,7 +21,7 @@ api_router = APIRouter()
 @api_router.get('', summary='Get blacklisted addresses as a file')
 async def banned_addresses_as_file(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
-    query_params: Annotated[DownloadQueryParams, Depends()],
+    query_params: Annotated[DownloadBlackListQueryParams, Depends()],
 ):
     async def file_records(params: dict[str, Any]) -> AsyncGenerator[str, None]:
         for record in await get_banned_addresses(redis_client_obj, params):
