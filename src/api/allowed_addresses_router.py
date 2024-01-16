@@ -64,3 +64,10 @@ async def count_allowed_addresses(
     service_obj = AllowedAddressesSetDBService(redis_client_obj)
     count = await service_obj.count()
     return CountResponseSchema(count=count)
+
+
+@api_router.get('/download', summary='Download whitelist of addresses/networks from storage')
+async def download_allowed_addresses(
+    redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
+):
+    pass

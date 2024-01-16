@@ -1,14 +1,11 @@
 from dataclasses import asdict
 from typing import Annotated
 from typing import Any
-from typing import AsyncGenerator
 from typing import Optional
-from urllib.parse import quote
 
 from fastapi import APIRouter
 from fastapi import BackgroundTasks
 from fastapi import Depends
-from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials
 
 from src.core.settings import ACTIVE_USAGE_INFO
@@ -18,7 +15,6 @@ from src.core.settings import HISTORY_USAGE_INFO
 from src.db.redis_db import RedisAsyncio
 from src.db.redis_db import redis_client
 from src.models.query_params_models import CommonQueryParams
-from src.models.query_params_models import DownloadQueryParams
 from src.schemas.addresses_schemas import AgentAddressesInfo
 from src.schemas.addresses_schemas import IpV4AddressList
 from src.schemas.common_response_schemas import AddResponseSchema
@@ -132,24 +128,3 @@ async def count_banned_addresses(
     service_obj = BlackListAddressesSetDBService(redis_client_obj)
     count = await service_obj.count()
     return CountResponseSchema(count=count)
-
-
-@api_router.get('/download', summary='Get blacklisted addresses as a file')
-async def banned_addresses_as_file(
-    redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
-    query_params: Annotated[DownloadQueryParams, Depends()],
-):
-    async def file_records(params: dict[str, Any]) -> AsyncGenerator[str, None]:
-        for record in await get_banned_addresses(redis_client_obj, params):
-            yield f'{(str(record))}\n'
-
-    headers = dict()
-    query_dict_params = asdict(query_params)
-    filename = query_dict_params.pop('filename')
-    if filename:
-        content_disposition_type = 'attachment'
-        content_disposition_filename = filename
-        headers['Content-Disposition'] = "{}; filename*=utf-8''{}".format(
-            content_disposition_type, quote(content_disposition_filename)
-        )
-    return StreamingResponse(file_records(query_dict_params), media_type='text/plain', headers=headers)

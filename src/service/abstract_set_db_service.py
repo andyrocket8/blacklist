@@ -37,14 +37,20 @@ class AbstractSetDBService(Generic[T]):
         self.db: RedisAsyncio = db
         self.set_id: UUID = set_id if set_id is not None else self.set_id
 
+    async def fetch_records(self, set_id: Optional[str] = None) -> AsyncGenerator[T, None]:
+        """Generator for fetching data from linked set"""
+        set_id = str(self.set_id) if set_id is None else set_id
+        async for record in self.db.sscan_iter(name=set_id, match='*'):
+            yield self.service_type(*[record])
+
     async def get_records(self, records_count: int = 0, all_records: bool = True) -> list[T]:
         """Getting records from database"""
         result = []
         set_id: str = str(self.set_id)
         logging.debug('Getting records from Redis database, set ID: %s', set_id)
         current_record = 0
-        async for record in self.db.sscan_iter(name=set_id, match='*'):
-            result.append(self.service_type(*[record]))
+        async for record in self.fetch_records(set_id):
+            result.append(record)
             if not all_records and records_count > 0:
                 current_record += 1
                 if current_record >= records_count:
