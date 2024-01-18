@@ -25,6 +25,8 @@ ADMIN_TOKENS_SET_ID = UUID('db3b6ec2-1c57-47e7-9ede-d7b51c4a374c')
 BATCH_SIZE = 1000
 BACKGROUND_ADD_RECORDS = 50
 BACKGROUND_DELETE_RECORDS = 50
+# Size of addresses storages implemented as lists (otherwise frozen set is used)
+MAX_STORAGE_LIST_SIZE = 10
 
 # History param detection mask
 HISTORY_TIMEDELTA_MASK = r'^([0-9]+)([smhd]{1})$'
