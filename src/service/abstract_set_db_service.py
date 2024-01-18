@@ -43,18 +43,22 @@ class AbstractSetDBService(Generic[T]):
         async for record in self.db.sscan_iter(name=set_id, match='*'):
             yield self.service_type(*[record])
 
+    async def get_records_gen(self, records_count: int = 0, all_records: bool = True) -> AsyncGenerator[T, None]:
+        current_record = 0
+        async for record in self.fetch_records():
+            yield record
+            if not all_records and records_count > 0:
+                current_record += 1
+                if current_record >= records_count:
+                    break
+
     async def get_records(self, records_count: int = 0, all_records: bool = True) -> list[T]:
         """Getting records from database"""
         result = []
         set_id: str = str(self.set_id)
         logging.debug('Getting records from Redis database, set ID: %s', set_id)
-        current_record = 0
-        async for record in self.fetch_records(set_id):
+        async for record in self.get_records_gen(records_count, all_records):
             result.append(record)
-            if not all_records and records_count > 0:
-                current_record += 1
-                if current_record >= records_count:
-                    break
         logging.debug('Retrieved %s records from Redis database, set ID: %s', len(result), set_id)
         return result
 
