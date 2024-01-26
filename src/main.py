@@ -12,6 +12,7 @@ from src.api.history_router import api_router as history_router
 from src.api.ping_router import api_router as ping_router
 from src.api.whitelist_router import api_router as whitelist_router
 from src.core.config import app_settings
+from version import get_version
 
 app_configs: dict[str, Any] = dict(
     {
@@ -19,11 +20,13 @@ app_configs: dict[str, Any] = dict(
         'title': app_settings.app_title,
         # Rust based JSON serializer
         'default_response_class': ORJSONResponse,
-        # root path for proxy serving adoptions (https://fastapi.tiangolo.com/advanced/behind-a-proxy/)
-        'root_path': app_settings.root_path,
+        'version': get_version(),
     }
 )
 
+if app_settings.root_path and app_settings.root_path != '/':
+    # root path for proxy serving adoptions (https://fastapi.tiangolo.com/advanced/behind-a-proxy/)
+    app_configs['root_path'] = app_settings.root_path
 
 # Show OpenAPI interface if allowed
 if app_settings.show_openapi:
@@ -32,7 +35,6 @@ if app_settings.show_openapi:
     # OpenAPI docs address OpenAPI
     app_configs['openapi_url'] = '/api/openapi.json'
 
-app_configs['debug'] = True
 app = FastAPI(**app_configs)
 app.include_router(banned_ip_router, prefix='/addresses/banned')
 app.include_router(allowed_ip_router, prefix='/addresses/allowed')
@@ -50,5 +52,4 @@ if __name__ == '__main__':
     LOGGING_CONFIG['formatters']['access'][
         'fmt'
     ] = '%(asctime)s %(levelprefix)s %(client_addr)s - "%(request_line)s" %(status_code)s'
-
     uvicorn.run('main:app', host=app_settings.host, port=app_settings.port, reload=True)
