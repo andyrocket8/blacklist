@@ -84,12 +84,22 @@ Configuration file for Blacklist installation implemented by ENV file.
 Default ENV file name is .env
 Description of ENV file entries is in /src/core/config.py
 
-Attention: lower cased names in config.py actually included in ENV file upper cased, i.e. redis_password should be REDIS_PASSWORD
+Attention: lower cased names in config.py actually included in ENV file uppercase, i.e. redis_password should be REDIS_PASSWORD
+
+### Securing redis
+If redis deployed with authentication you should use ACL redis secure model, described here: https://redis.io/docs/management/security/acl/
+
+If redis secured use the following configuration options
+```
+REDIS_USE_AUTHENTICATION=true
+REDIS_USERNAME=<User name related to valid ACL>
+REDIS_PASSWORD=<User password related to valid ACL>
+```
+
+If no redis authentication used set REDIS_USE_AUTHENTICATION to false
 
 ### Configuration boundaries
-1) Redis authentication is not yet implemented hence REDIS_USE_AUTHENTICATION and followed REDIS_USERNAME, REDIS_PASSWORD have no effect
-
-Issue for implementation: - [ ] https://github.com/andyrocket8/blacklist/issues/14
+Not known
 
 ## Custom logging
 Custom logging available by substitution of /src/core/logger.py file. Use dictionary logging config feature (https://docs.python.org/3/library/logging.config.html)

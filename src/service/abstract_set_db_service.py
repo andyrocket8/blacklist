@@ -9,6 +9,10 @@ from typing import TypeVar
 from typing import cast
 from uuid import UUID
 
+from fastapi import status
+from fastapi.exceptions import HTTPException
+from redis.exceptions import RedisError
+
 from src.core.settings import BATCH_SIZE
 from src.db.redis_db import RedisAsyncio
 
@@ -40,8 +44,12 @@ class AbstractSetDBService(Generic[T]):
     async def fetch_records(self, set_id: Optional[str] = None) -> AsyncGenerator[T, None]:
         """Generator for fetching data from linked set"""
         set_id = str(self.set_id) if set_id is None else set_id
-        async for record in self.db.sscan_iter(name=set_id, match='*'):
-            yield self.service_type(*[record])
+        try:
+            async for record in self.db.sscan_iter(name=set_id, match='*'):
+                yield self.service_type(*[record])
+        except RedisError as e:
+            logging.error('On redis fetching error occurred, details: %s', str(e))
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def get_records_gen(self, records_count: int = 0, all_records: bool = True) -> AsyncGenerator[T, None]:
         current_record = 0
