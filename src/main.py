@@ -32,7 +32,7 @@ if app_settings.show_openapi:
     # OpenAPI docs address OpenAPI
     app_configs['openapi_url'] = '/api/openapi.json'
 
-
+app_configs['debug'] = True
 app = FastAPI(**app_configs)
 app.include_router(banned_ip_router, prefix='/addresses/banned')
 app.include_router(allowed_ip_router, prefix='/addresses/allowed')

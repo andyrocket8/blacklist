@@ -1,4 +1,5 @@
 """ Schemas for networks"""
+
 from ipaddress import IPv4Network
 from json import JSONEncoder
 

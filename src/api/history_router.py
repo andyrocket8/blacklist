@@ -1,4 +1,5 @@
 """History handlers router"""
+
 import datetime
 from ipaddress import IPv4Address
 from typing import Annotated
