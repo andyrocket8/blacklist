@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "blacklist"
-version = "1.4.0"
+version = "1.5.0"
 description = ""
 authors = ["Dmitriev Andrey <justkeepwalking@yandex.ru>"]
 readme = "README.md"
@@ -8,7 +8,7 @@ packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
-fastapi = "^0.108.0"
+fastapi = "^0.109.0"
 flake8 = "^7.0.0"
 mypy = "^1.7.1"
 isort = "^5.12.0"
