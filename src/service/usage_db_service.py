@@ -1,4 +1,5 @@
 """DB Service for usage history processing"""
+
 from src.core.settings import ACTIVE_USAGE_INFO
 from src.schemas.usage_schemas import UsageClassesEncoder
 from src.schemas.usage_schemas import UsageRecord
