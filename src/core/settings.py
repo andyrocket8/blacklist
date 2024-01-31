@@ -4,6 +4,8 @@ from uuid import UUID
 MSK_TZ = zoneinfo.ZoneInfo('Europe/Moscow')
 CUR_TZ = MSK_TZ  # alias for current timezone. You are free to redeclare it in further implementations
 
+POETRY_CONFIG_FIlE = 'pyproject.toml'
+
 # Redis constants
 # Addresses Set Identifiers
 BLACK_LIST_ADDRESSES_SET_ID = UUID('2c45911a-3d93-4dae-bd29-362b9880008f')
