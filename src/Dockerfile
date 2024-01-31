@@ -22,8 +22,8 @@ FROM python:3.11-alpine as base-app
 WORKDIR /app
 
 COPY --from=builder /app /app
+COPY *.py /app/
 COPY src /app/src
-COPY manage.py /app/
 COPY setup.cfg /app/
 
 RUN apk --update add curl
