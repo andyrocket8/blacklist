@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 import uvicorn  # type: ignore[import-untyped]
@@ -44,6 +45,7 @@ app.include_router(ping_router, prefix='/ping')
 app.include_router(blacklist_router, prefix='/blacklist')
 app.include_router(whitelist_router, prefix='/whitelist')
 
+logging.info('Loading blacklist app, version %s', get_version())
 
 if __name__ == '__main__':
     from uvicorn.config import LOGGING_CONFIG

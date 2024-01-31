@@ -12,7 +12,7 @@ _clean_builder:
 
 _test:
 		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "source .venv/bin/activate && flake8 -v --config setup.cfg"
-		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "source .venv/bin/activate && mypy src"
+		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "source .venv/bin/activate && mypy ."
 		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "source .venv/bin/activate && black ."
 		docker run -i --rm --entrypoint sh ${_BUILD_ARGS_IMAGE_NAME} -c "source .venv/bin/activate && pytest"
 
