@@ -7,7 +7,6 @@ LOG_DEFAULT_HANDLERS = [
 # https://docs.python.org/3/howto/logging.html
 # https://docs.python.org/3/howto/logging-cookbook.html
 
-
 # substitute this file for customizing logging in your deployment
 LOGGING = {
     'version': 1,

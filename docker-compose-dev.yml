@@ -2,12 +2,11 @@
 
 services:
   redis:
-    image: redis:7.2.3-alpine3.18
+    build:
+      dockerfile: ./services/redis/Dockerfile
     volumes:
       - redis_data:/data
     network_mode: host
-    env_file:
-      - ./compose-redis.env
 
   # app:
   #  build:
