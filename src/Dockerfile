@@ -12,8 +12,7 @@ COPY poetry.lock pyproject.toml ./
 #  && apk del gcc rust cargo postgresql build-base \
 #  && rm -rf /var/cache/apk/*
 
-RUN apk --update add curl \
- && python -m pip install --no-cache-dir poetry==1.7.1 \
+RUN python -m pip install --no-cache-dir poetry==1.7.1 \
  && poetry config virtualenvs.in-project true \
  && poetry install --without dev,jupyter --no-interaction --no-ansi --no-root
 
@@ -46,6 +45,7 @@ FROM python:3.11-alpine as base-app
 
 WORKDIR /app
 
+RUN apk --update add curl
 COPY --from=builder /app /app
 
 ENV PYTHONUNBUFFERED=1
@@ -58,6 +58,7 @@ FROM python:3.11-alpine as celery-app
 WORKDIR /app
 
 COPY --from=builder /app /app
+RUN apk --update add curl
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
