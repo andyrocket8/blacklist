@@ -98,6 +98,13 @@ REDIS_PASSWORD=<User password related to valid ACL>
 
 If no redis authentication used set REDIS_USE_AUTHENTICATION to false
 
+### Custom redis config
+If you use docker compose for deployment it's possible to use custom configuration.
+Option 1. Substitute /usr/local/etc/redis.conf with custom configuration on deployment
+Option 2. For usage of Redis ACL put custom users.acl to ./services/redis/users.acl
+On image build your file will be linked with distribution redis.conf by its import.
+
+
 ### Configuration boundaries
 Not known
 

@@ -13,3 +13,7 @@ notebooks/
 
 # dist files
 dist/
+
+# coverage files
+htmlcov/*
+.coverage

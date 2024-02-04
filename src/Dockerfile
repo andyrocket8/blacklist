@@ -12,21 +12,41 @@ COPY poetry.lock pyproject.toml ./
 #  && apk del gcc rust cargo postgresql build-base \
 #  && rm -rf /var/cache/apk/*
 
-RUN python -m pip install --no-cache-dir poetry==1.7.1 \
+RUN apk --update add curl \
+ && python -m pip install --no-cache-dir poetry==1.7.1 \
  && poetry config virtualenvs.in-project true \
- && poetry install --without dev --no-interaction --no-ansi --no-root
+ && poetry install --without dev,jupyter --no-interaction --no-ansi --no-root
 
+# copy application files
+COPY *.py /app/
+COPY src /app/src
+
+
+# Builder for development
+FROM builder AS dev-builder
+WORKDIR /app
+
+# Add development dependencies
+RUN poetry install --without jupyter --no-interaction --no-ansi --no-root
+COPY setup.cfg /app/
+
+
+# Image for development
+FROM python:3.11-alpine AS dev-app
+WORKDIR /app
+COPY --from=dev-builder /app /app
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+# Run development version of uvicorn based in main.py
+CMD ["/app/.venv/bin/python", "./src/main.py"]
 
 FROM python:3.11-alpine as base-app
 
 WORKDIR /app
 
 COPY --from=builder /app /app
-COPY *.py /app/
-COPY src /app/src
-COPY setup.cfg /app/
-
-RUN apk --update add curl
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
@@ -38,9 +58,6 @@ FROM python:3.11-alpine as celery-app
 WORKDIR /app
 
 COPY --from=builder /app /app
-COPY src /app/src
-
-RUN apk --update add curl
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app

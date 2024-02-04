@@ -9,25 +9,29 @@ packages = [{include = "src"}]
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
 fastapi = "^0.109.0"
-flake8 = "^7.0.0"
-mypy = "^1.7.1"
-isort = "^5.12.0"
 uvicorn = "^0.27.0"
 pydantic-settings = "^2.1.0"
 orjson = "^3.9.10"
 redis = "^5.0.1"
-flake8-bugbear = "^24.1.17"
-pep8-naming = "^0.13.3"
-black = "^24.1.0"
-pre-commit = "^3.5.0"
-flake8-builtins = "^2.2.0"
-flake8-quotes = "^3.3.2"
 pytest = "^7.4.3"
 pytest-asyncio = "^0.23.2"
 celery = "^5.3.6"
 tomli = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
+coverage = "^7.4.1"
+flake8 = "^7.0.0"
+mypy = "^1.8.0"
+isort = "^5.13.2"
+black = "^24.1.1"
+pre-commit = "^3.6.0"
+flake8-bugbear = "^24.1.17"
+pep8-naming = "^0.13.3"
+flake8-builtins = "^2.2.0"
+flake8-quotes = "^3.3.2"
+
+
+[tool.poetry.group.jupyter.dependencies]
 jupyter = "^1.0.0"
 
 [build-system]
