@@ -23,4 +23,4 @@ async def ping(
         return {'keys_count': await redis_client_obj.dbsize()}
     except RedisError as e:
         logging.error('On redis ping operation error occurred, details: %s', str(e))
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR) from None

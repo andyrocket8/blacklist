@@ -30,7 +30,7 @@ def test_load_version(capsys):
         ), 'Wrong error message on case #1 : absent pyproject.toml, mismatch notification in header'
         assert (
             captured.out.index('Error while loading pyproject.toml file') != -1
-        ), f"No such file or directory: '{str(temp_dir.joinpath(POETRY_CONFIG_FIlE))}'"
+        ), f'No such file or directory: {str(temp_dir.joinpath(POETRY_CONFIG_FIlE))!r}'
 
         # case 2 - wrong toml structure
 

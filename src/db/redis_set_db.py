@@ -47,7 +47,7 @@ class RedisSetDB(AbstractDBSet, Generic[K, T]):
             return await cast(Awaitable[Any], self.__db.srem(str_set_id, *deleted_data_t))
         except RedisError as e:
             logging.error('On redis set deletion operation error occurred, details: %s', str(e))
-            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e)))
+            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
     async def write_to_set(self, set_id: K, changed_data: Iterable[T]) -> int:
         """Asynchronously write data to Redis set"""
@@ -58,7 +58,7 @@ class RedisSetDB(AbstractDBSet, Generic[K, T]):
             return await cast(Awaitable[Any], self.__db.sadd(str_set_id, *changed_data_t))
         except RedisError as e:
             logging.error('On redis set write operation error occurred, details: %s', str(e))
-            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e)))
+            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
     async def __fetch_one_set(self, set_id: K) -> AsyncGenerator[T, None]:
         """Fetch from one set (default option)"""
@@ -68,7 +68,7 @@ class RedisSetDB(AbstractDBSet, Generic[K, T]):
                 yield self.service_type(*[record])
         except RedisError as e:
             logging.error('On redis fetching error occurred, details: %s', str(e))
-            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e)))
+            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
     async def __merge_sets(self, set_id: K, *set_ids_to_union: K) -> K:
         """Merge sets and return set ID"""
@@ -89,7 +89,7 @@ class RedisSetDB(AbstractDBSet, Generic[K, T]):
             return merged_set_id
         except RedisError as e:
             logging.error('On redis fetching error occurred, details: %s', str(e))
-            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e)))
+            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
     async def fetch_records(self, set_id: K, *set_ids_to_union: K) -> AsyncGenerator[T, None]:
         remove_set, fetching_set = False, set_id
@@ -112,7 +112,7 @@ class RedisSetDB(AbstractDBSet, Generic[K, T]):
             await self.__db.delete(str_set_id)
         except RedisError as e:
             logging.error('On redis set deletion error occurred, set ID: %s, details: %s', str_set_id, str(e))
-            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e)))
+            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
     async def count(self, set_id: K) -> int:
         """Get records count from set"""
@@ -122,7 +122,7 @@ class RedisSetDB(AbstractDBSet, Generic[K, T]):
             return await cast(Awaitable[Any], self.__db.scard(str_set_id))
         except RedisError as e:
             logging.error('On redis counting set size error occurred, details: %s', str(e))
-            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e)))
+            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
 
 class IpAddressRedisSetDB(RedisSetDB[UUID, IPv4Address]):
