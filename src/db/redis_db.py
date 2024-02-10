@@ -53,7 +53,7 @@ async def redis_client() -> AsyncGenerator[RedisAsyncio, None]:
 @asynccontextmanager
 async def context_async_redis_client(job_name: str) -> AsyncGenerator[RedisAsyncio, None]:
     """Connection manager for async jobs (auth checks, celery jobs)"""
-    client = RedisAsyncio.from_pool(connection_pool_obj.connection_pool)
+    client: RedisAsyncio = RedisAsyncio.from_pool(connection_pool_obj.connection_pool)
     logging.debug('Obtaining redis client connection for %s job', job_name)
     try:
         yield client
