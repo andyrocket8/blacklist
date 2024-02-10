@@ -16,6 +16,8 @@ from src.core.settings import BACKGROUND_DELETE_RECORDS
 from src.core.settings import HISTORY_USAGE_INFO
 from src.db.redis_db import RedisAsyncio
 from src.db.redis_db import redis_client
+from src.db.redis_set_db import IpAddressRedisSetDB
+from src.db.redis_set_db import IpNetworkRedisSetDB
 from src.models.query_params_models import CommonQueryParams
 from src.schemas.addresses_schemas import AgentAddressesInfo
 from src.schemas.addresses_schemas import IpV4AddressList
@@ -43,16 +45,16 @@ async def get_banned_addresses(redis_client_obj: RedisAsyncio, query_params: dic
     start_moment = datetime.datetime.now()
     try:
         logging.debug('Starting blacklist query execution')
-        service_obj = BlackListAddressesSetDBService(redis_client_obj)
+        service_obj = BlackListAddressesSetDBService(IpAddressRedisSetDB(redis_client_obj))
         filter_records = query_params.pop('filter_records')
         # TODO There's no need to get all records. We can fetch them for further filtering and return them without
         # memory utilization
         banned_records = await service_obj.get_records(**query_params)
         if filter_records:
             # filter by allowed IPs
-            allowed_service_obj = AllowedAddressesSetDBService(redis_client_obj)
+            allowed_service_obj = AllowedAddressesSetDBService(IpAddressRedisSetDB(redis_client_obj))
             allowed_records = await allowed_service_obj.get_records(all_records=True)
-            allowed_net_service_obj = AllowedNetworksSetDBService(redis_client_obj)
+            allowed_net_service_obj = AllowedNetworksSetDBService(IpNetworkRedisSetDB(redis_client_obj))
             allowed_networks = await allowed_net_service_obj.get_records(all_records=True)
             return [x async for x in without_allowed_ips(banned_records, allowed_records, allowed_networks)]
         return banned_records
@@ -83,7 +85,7 @@ async def save_banned_addresses(
     background_tasks: BackgroundTasks,
     auth: Optional[HTTPAuthorizationCredentials] = Depends(banned_addresses_auth_check),  # noqa: B008
 ):
-    service_obj = BlackListAddressesSetDBService(redis_client_obj)
+    service_obj = BlackListAddressesSetDBService(IpAddressRedisSetDB(redis_client_obj))
     added_count = await service_obj.write_records(agent_info.addresses)
     if len(agent_info.addresses) <= BACKGROUND_ADD_RECORDS:
         # run fast tasks in background
@@ -114,7 +116,7 @@ async def delete_banned_addresses(
     background_tasks: BackgroundTasks,
     auth: Optional[HTTPAuthorizationCredentials] = Depends(banned_addresses_auth_check),  # noqa: B008
 ):
-    service_obj = BlackListAddressesSetDBService(redis_client_obj)
+    service_obj = BlackListAddressesSetDBService(IpAddressRedisSetDB(redis_client_obj))
     deleted_count = await service_obj.del_records(agent_info.addresses)
     if len(agent_info.addresses) <= BACKGROUND_DELETE_RECORDS:
         background_tasks.add_task(
@@ -132,6 +134,6 @@ async def delete_banned_addresses(
 async def count_banned_addresses(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
-    service_obj = BlackListAddressesSetDBService(redis_client_obj)
+    service_obj = BlackListAddressesSetDBService(IpAddressRedisSetDB(redis_client_obj))
     count = await service_obj.count()
     return CountResponseSchema(count=count)

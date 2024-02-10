@@ -1,10 +1,13 @@
 import logging
+from ipaddress import IPv4Address
+from ipaddress import IPv4Network
 from typing import Any
 from typing import AsyncGenerator
 from typing import Awaitable
 from typing import Generic
 from typing import Iterable
 from typing import cast
+from uuid import UUID
 
 from redis.asyncio import Redis as RedisAsyncio
 from redis.asyncio import RedisError
@@ -69,3 +72,15 @@ class RedisSetDB(AbstractDBSet, Generic[K, T]):
         except RedisError as e:
             logging.error('On redis counting set size error occurred, details: %s', str(e))
             raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e)))
+
+
+class IpAddressRedisSetDB(RedisSetDB[UUID, IPv4Address]):
+    service_type = IPv4Address
+
+
+class IpNetworkRedisSetDB(RedisSetDB[UUID, IPv4Network]):
+    service_type = IPv4Network
+
+
+class UUIDRedisSetDB(RedisSetDB[UUID, UUID]):
+    service_type = UUID
