@@ -71,7 +71,7 @@ async def test_in_memory_db_set(ip_addresses_data_one, ip_addresses_data_two, ip
             ip_addresses_data_three,
         )
     ):
-        await db_set.write_set(set_data.set_id, set_data.set_base_contents)
+        await db_set.write_to_set(set_data.set_id, set_data.set_base_contents)
         assert (
             await db_set.count(set_data.set_id) == set_data.expected_length
         ), f'Expected set length for set {set_number} is {set_data.expected_length}'
@@ -95,9 +95,13 @@ async def test_in_memory_db_set(ip_addresses_data_one, ip_addresses_data_two, ip
     assert IPv4Address('192.168.1.8') in records, "Expecting existence of '192.168.1.8' address in united records"
     assert IPv4Address('192.168.1.1') not in records, "Expecting absence of '192.168.1.1' address in united records"
     # cleaning up some sets
-    deleted_records = await db_set.del_set(ip_addresses_data_three.set_id, ip_addresses_data_three.set_base_contents)
+    deleted_records = await db_set.del_from_set(
+        ip_addresses_data_three.set_id, ip_addresses_data_three.set_base_contents
+    )
     records = [x async for x in db_set.fetch_records(ip_addresses_data_three.set_id)]
     assert len(records) == 0, 'Should be empty set contents after deletion (set 3)'
     assert deleted_records == 5, 'Should be 5 deleted records'
-    deleted_records = await db_set.del_set(ip_addresses_data_three.set_id, ip_addresses_data_three.set_base_contents)
+    deleted_records = await db_set.del_from_set(
+        ip_addresses_data_three.set_id, ip_addresses_data_three.set_base_contents
+    )
     assert deleted_records == 0, 'Should be 0 deleted records on empty set'

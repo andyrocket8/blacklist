@@ -23,6 +23,9 @@ AGENT_TOKENS_SET_ID = UUID('6f337b57-5135-427b-a52f-03390fdb8064')
 # place in this set authorization token for administrator methods (All methods)
 ADMIN_TOKENS_SET_ID = UUID('db3b6ec2-1c57-47e7-9ede-d7b51c4a374c')
 
+# Temporarily sets expire period (in seconds)
+SET_EXPIRE_SECONDS = 600
+
 # Sets Constants
 BATCH_SIZE = 1000
 BACKGROUND_ADD_RECORDS = 50
