@@ -4,7 +4,6 @@ from typing import AsyncGenerator
 from typing import Awaitable
 from typing import Generic
 from typing import Optional
-from typing import Type
 from typing import TypeVar
 from typing import cast
 from uuid import UUID
@@ -15,9 +14,8 @@ from redis.exceptions import RedisError
 
 from src.core.settings import BATCH_SIZE
 from src.db.redis_db import RedisAsyncio
-
-T = TypeVar('T')
-TypeT = Type[T]
+from src.models.abstract_types import T
+from src.models.abstract_types import TypeT
 
 
 async def iter_over_records(iter_records: list[T]) -> AsyncGenerator[tuple[int, str], None]:
