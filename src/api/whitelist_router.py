@@ -9,6 +9,8 @@ from fastapi.responses import StreamingResponse
 
 from src.db.redis_db import RedisAsyncio
 from src.db.redis_db import redis_client
+from src.db.redis_set_db import IpAddressRedisSetDB
+from src.db.redis_set_db import IpNetworkRedisSetDB
 from src.models.query_params_models import DownloadWhitelistQueryParams
 from src.service.addresses_db_service import AllowedAddressesSetDBService
 from src.service.networks_db_service import AllowedNetworksSetDBService
@@ -18,14 +20,14 @@ api_router = APIRouter()
 
 async def get_address_records(redis_client_obj: RedisAsyncio) -> AsyncGenerator[str, None]:
     """Get allowed addresses one by one for file processing"""
-    address_service_obj = AllowedAddressesSetDBService(redis_client_obj)
+    address_service_obj = AllowedAddressesSetDBService(IpAddressRedisSetDB(redis_client_obj))
     async for record in address_service_obj.fetch_records():
         yield f'{(str(record))}\n'
 
 
 async def get_networks_records(redis_client_obj: RedisAsyncio) -> AsyncGenerator[str, None]:
     """Get allowed networks one by one for file processing"""
-    network_service_obj = AllowedNetworksSetDBService(redis_client_obj)
+    network_service_obj = AllowedNetworksSetDBService(IpNetworkRedisSetDB(redis_client_obj))
     async for record in network_service_obj.fetch_records():
         yield f'{(str(record))}\n'
 

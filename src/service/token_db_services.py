@@ -7,10 +7,8 @@ from .abstract_set_db_service import AbstractSetDBService
 
 
 class AgentTokensSetDBService(AbstractSetDBService[UUID]):
-    service_type = UUID
-    set_id = AGENT_TOKENS_SET_ID
+    class_set_id = AGENT_TOKENS_SET_ID
 
 
 class AdminTokensSetDBService(AbstractSetDBService[UUID]):
-    service_type = UUID
-    set_id = ADMIN_TOKENS_SET_ID
+    class_set_id = ADMIN_TOKENS_SET_ID

@@ -8,6 +8,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 
 from src.db.redis_db import RedisAsyncio
 from src.db.redis_db import redis_client
+from src.db.redis_set_db import IpNetworkRedisSetDB
 from src.schemas.common_response_schemas import AddResponseSchema
 from src.schemas.common_response_schemas import CountResponseSchema
 from src.schemas.common_response_schemas import DeleteResponseSchema
@@ -31,7 +32,7 @@ async def get_allowed_networks(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     query_params: Annotated[dict, Depends(get_query_params)],
 ):
-    service_obj = AllowedNetworksSetDBService(redis_client_obj)
+    service_obj = AllowedNetworksSetDBService(IpNetworkRedisSetDB(redis_client_obj))
     return await service_obj.get_records(**query_params)
 
 
@@ -41,7 +42,7 @@ async def save_allowed_networks(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     auth: Optional[HTTPAuthorizationCredentials] = Depends(allowed_networks_auth_check),  # noqa: B008
 ):
-    service_obj = AllowedNetworksSetDBService(redis_client_obj)
+    service_obj = AllowedNetworksSetDBService(IpNetworkRedisSetDB(redis_client_obj))
     added_count = await service_obj.write_records(agent_info.networks)
     return AddResponseSchema(added=added_count)
 
@@ -52,7 +53,7 @@ async def delete_allowed_networks(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     auth: Optional[HTTPAuthorizationCredentials] = Depends(allowed_networks_auth_check),  # noqa: B008
 ):
-    service_obj = AllowedNetworksSetDBService(redis_client_obj)
+    service_obj = AllowedNetworksSetDBService(IpNetworkRedisSetDB(redis_client_obj))
     deleted_count = await service_obj.del_records(agent_info.networks)
     return DeleteResponseSchema(deleted=deleted_count)
 
@@ -61,6 +62,6 @@ async def delete_allowed_networks(
 async def count_allowed_networks(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
-    service_obj = AllowedNetworksSetDBService(redis_client_obj)
+    service_obj = AllowedNetworksSetDBService(IpNetworkRedisSetDB(redis_client_obj))
     count = await service_obj.count()
     return CountResponseSchema(count=count)
