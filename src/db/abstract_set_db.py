@@ -19,14 +19,14 @@ class AbstractDBSet(ABC, Generic[K, T]):
     """Abstract DB Connector with Set Features implementation"""
 
     @abstractmethod
-    async def write_set(self, set_id: K, changed_data: Iterable[T]) -> int:
+    async def write_to_set(self, set_id: K, changed_data: Iterable[T]) -> int:
         """Write data to set. Create set if not exists
         :returns int: count of affected records
         """
         pass
 
     @abstractmethod
-    async def del_set(self, set_id: K, deleted_data: Iterable[T]) -> int:
+    async def del_from_set(self, set_id: K, deleted_data: Iterable[T]) -> int:
         """Delete data from set. If set remains empty - remove empty set
         :returns int: count of affected records
         """

@@ -37,7 +37,7 @@ class InMemoryDBSet(AbstractDBSet, Generic[K, T]):
         if set_id in self.__data:
             del self.__data[set_id]
 
-    async def write_set(self, set_id: K, changed_data: Iterable[T]) -> int:
+    async def write_to_set(self, set_id: K, changed_data: Iterable[T]) -> int:
         set_data = self.__get_set(set_id, create_on_empty=True)
         records_count = 0
         for elem in changed_data:
@@ -47,7 +47,7 @@ class InMemoryDBSet(AbstractDBSet, Generic[K, T]):
                 await sleep(0)
         return records_count
 
-    async def del_set(self, set_id: K, deleted_data: Iterable[T]) -> int:
+    async def del_from_set(self, set_id: K, deleted_data: Iterable[T]) -> int:
         set_data = self.__get_set(set_id)
         records_count = 0
         for elem in deleted_data:

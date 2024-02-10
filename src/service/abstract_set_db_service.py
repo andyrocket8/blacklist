@@ -61,11 +61,11 @@ class AbstractSetDBService(Generic[T]):
         async for need_flush, record in iter_over_records(records):
             records_to_add.append(record)
             if need_flush:
-                iter_written = await self.__db_set.write_set(self.__set_id, records_to_add)
+                iter_written = await self.__db_set.write_to_set(self.__set_id, records_to_add)
                 saved_records += iter_written
                 records_to_add = []
         if len(records_to_add):
-            iter_written = await self.__db_set.write_set(self.__set_id, records_to_add)
+            iter_written = await self.__db_set.write_to_set(self.__set_id, records_to_add)
             saved_records += iter_written
         logging.debug('Actually wrote %d records to database', saved_records)
         return saved_records
@@ -79,11 +79,11 @@ class AbstractSetDBService(Generic[T]):
         async for need_flush, record in iter_over_records(records):
             records_to_delete.append(record)
             if need_flush:
-                iter_deleted = await self.__db_set.del_set(self.__set_id, records_to_delete)
+                iter_deleted = await self.__db_set.del_from_set(self.__set_id, records_to_delete)
                 deleted_records += iter_deleted
                 records_to_delete = []
         if len(records_to_delete):
-            iter_deleted = await self.__db_set.del_set(self.__set_id, records_to_delete)
+            iter_deleted = await self.__db_set.del_from_set(self.__set_id, records_to_delete)
             deleted_records += iter_deleted
         logging.debug('Total deleted %d records from database', deleted_records)
         return deleted_records

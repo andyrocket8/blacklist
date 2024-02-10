@@ -2,6 +2,7 @@ import datetime
 import re
 from typing import Optional
 
+from src.core.settings import CUR_TZ
 from src.core.settings import HISTORY_TIMEDELTA_MASK
 
 
@@ -19,3 +20,7 @@ def get_timedelta_for_history_query(param_value: str) -> Optional[datetime.timed
         }
         return datetime.timedelta(**time_delta_params)
     return None
+
+
+def get_current_time_with_tz() -> datetime.datetime:
+    return datetime.datetime.now(tz=CUR_TZ)
