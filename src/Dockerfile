@@ -32,8 +32,7 @@ COPY setup.cfg /app/
 
 # Image for development
 FROM python:3.11-alpine AS dev-app
-ENV TZ=Europe/Moscow
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN ln -snf /usr/share/zoneinfo/Europe/Moscow /etc/localtime && echo 'Europe/Moscow' > /etc/timezone
 WORKDIR /app
 COPY --from=dev-builder /app /app
 
@@ -44,8 +43,7 @@ ENV PYTHONPATH=/app
 CMD ["/app/.venv/bin/python", "./src/main.py"]
 
 FROM python:3.11-alpine as base-app
-ENV TZ=Europe/Moscow
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN ln -snf /usr/share/zoneinfo/Europe/Moscow /etc/localtime && echo 'Europe/Moscow' > /etc/timezone
 WORKDIR /app
 
 RUN apk --update add curl
@@ -57,8 +55,7 @@ ENV PYTHONPATH=/app
 CMD ["/app/.venv/bin/uvicorn", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "src.main:app"]
 
 FROM python:3.11-alpine as celery-app
-ENV TZ=Europe/Moscow
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN ln -snf /usr/share/zoneinfo/Europe/Moscow /etc/localtime && echo 'Europe/Moscow' > /etc/timezone
 WORKDIR /app
 
 COPY --from=builder /app /app
