@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 
-from src.db.in_memory_set_db import InMemoryDBSet
+from src.db.in_memory_set_db import InMemoryUnionDBSet
 
 
 @dataclass
@@ -62,7 +62,7 @@ def ip_addresses_data_three() -> FixtureSet:
 
 @pytest.mark.asyncio
 async def test_in_memory_db_set(ip_addresses_data_one, ip_addresses_data_two, ip_addresses_data_three):
-    db_set = InMemoryDBSet[UUID, IPv4Address]()
+    db_set = InMemoryUnionDBSet[UUID, IPv4Address]()
     # Check correct implementation of 'write_set' and 'count' methods for all test sets
     for set_number, set_data in enumerate(
         (
@@ -82,7 +82,7 @@ async def test_in_memory_db_set(ip_addresses_data_one, ip_addresses_data_two, ip
     # Check validity of union function for read operation
     records = [
         x
-        async for x in db_set.fetch_records(
+        async for x in db_set.fetch_union_records(
             ip_addresses_data_one.set_id, ip_addresses_data_two.set_id, ip_addresses_data_three.set_id
         )
     ]
@@ -90,7 +90,9 @@ async def test_in_memory_db_set(ip_addresses_data_one, ip_addresses_data_two, ip
     assert IPv4Address('192.168.1.1') in records, "Expecting existence of '192.168.1.1' address in united records"
     assert IPv4Address('192.168.1.9') not in records, "Expecting absence of '192.168.1.9' address in united records"
     # Check validity of 2 sets unions
-    records = [x async for x in db_set.fetch_records(ip_addresses_data_two.set_id, ip_addresses_data_three.set_id)]
+    records = [
+        x async for x in db_set.fetch_union_records(ip_addresses_data_two.set_id, ip_addresses_data_three.set_id)
+    ]
     assert len(records) == 7, 'Expected set length for union of 2 sets is 7'
     assert IPv4Address('192.168.1.8') in records, "Expecting existence of '192.168.1.8' address in united records"
     assert IPv4Address('192.168.1.1') not in records, "Expecting absence of '192.168.1.1' address in united records"
@@ -98,7 +100,7 @@ async def test_in_memory_db_set(ip_addresses_data_one, ip_addresses_data_two, ip
     deleted_records = await db_set.del_from_set(
         ip_addresses_data_three.set_id, ip_addresses_data_three.set_base_contents
     )
-    records = [x async for x in db_set.fetch_records(ip_addresses_data_three.set_id)]
+    records = [x async for x in db_set.fetch_union_records(ip_addresses_data_three.set_id)]
     assert len(records) == 0, 'Should be empty set contents after deletion (set 3)'
     assert deleted_records == 5, 'Should be 5 deleted records'
     deleted_records = await db_set.del_from_set(

@@ -28,7 +28,7 @@ _test:
 _check:
 		isort .
 		flake8 -v --config setup.cfg
-		mypy src
+		mypy .
 		black .
 		pytest
 

@@ -23,6 +23,7 @@ from src.utils.time_utils import get_current_time_with_tz
 
 from .abstract_set_db import AbstractDBSet
 from .abstract_set_db import AbstractSetDbError
+from .abstract_set_db import AbstractUnionDBSet
 
 
 class RedisSetDBError(AbstractSetDbError):
@@ -60,49 +61,15 @@ class RedisSetDB(AbstractDBSet, Generic[K, T]):
             logging.error('On redis set write operation error occurred, details: %s', str(e))
             raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
-    async def __fetch_one_set(self, set_id: K) -> AsyncGenerator[T, None]:
+    async def fetch_records(self, set_id: K) -> AsyncGenerator[T, None]:
         """Fetch from one set (default option)"""
         str_set_id = str(set_id)
         try:
             async for record in self.__db.sscan_iter(name=str_set_id, match='*'):
-                yield self.service_type(*[record])
+                yield self.service_type(*[record])  # perform ServiceType instantiation here
         except RedisError as e:
             logging.error('On redis fetching error occurred, details: %s', str(e))
             raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
-
-    async def __merge_sets(self, set_id: K, *set_ids_to_union: K) -> K:
-        """Merge sets and return set ID"""
-
-        sets_to_merge: tuple[str, ...] = (str(set_id),) + tuple([str(x) for x in set_ids_to_union])
-        merged_set_id = self.new_id_creator()
-        try:
-            logging.debug('Merging sets to new, set ID: %s', merged_set_id)
-            records_merged: int = await cast(
-                Awaitable[Any], self.__db.sunionstore(str(merged_set_id), list(sets_to_merge))
-            )
-            logging.debug('Sets merged, records count: %d, set ID: %s', records_merged, merged_set_id)
-            logging.debug(
-                'Setting set expire time to %s, set ID: %s',
-                get_current_time_with_tz() + dt_timedelta(seconds=SET_EXPIRE_SECONDS),
-            )
-            await self.__db.expire(str(merged_set_id), SET_EXPIRE_SECONDS)
-            return merged_set_id
-        except RedisError as e:
-            logging.error('On redis fetching error occurred, details: %s', str(e))
-            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
-
-    async def fetch_records(self, set_id: K, *set_ids_to_union: K) -> AsyncGenerator[T, None]:
-        remove_set, fetching_set = False, set_id
-        if len(set_ids_to_union):
-            fetching_set = await self.__merge_sets(set_id, *set_ids_to_union)
-            remove_set = True
-        try:
-            async for record in self.__fetch_one_set(fetching_set):
-                yield record
-        finally:
-            if remove_set:
-                # Explicitly remove temporarily set
-                await self.remove_set(fetching_set)
 
     async def remove_set(self, set_id: K):
         """Remove set"""
@@ -125,12 +92,52 @@ class RedisSetDB(AbstractDBSet, Generic[K, T]):
             raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
 
-class IpAddressRedisSetDB(RedisSetDB[UUID, IPv4Address]):
+class RedisUnionSetDB(AbstractUnionDBSet, RedisSetDB, Generic[K, T]):
+    def __init__(self, db: RedisAsyncio):
+        super().__init__(db)
+        self.__db = db
+
+    async def __merge_sets(self, set_id: K, *set_ids_to_union: K) -> K:
+        """Merge sets and return set ID"""
+
+        sets_to_merge: tuple[str, ...] = (str(set_id),) + tuple([str(x) for x in set_ids_to_union])
+        merged_set_id = self.new_id_creator()
+        try:
+            logging.debug('Merging sets to new, set ID: %s', merged_set_id)
+            records_merged: int = await cast(
+                Awaitable[Any], self.__db.sunionstore(str(merged_set_id), list(sets_to_merge))
+            )
+            logging.debug('Sets merged, records count: %d, set ID: %s', records_merged, merged_set_id)
+            logging.debug(
+                'Setting set expire time to %s, set ID: %s',
+                get_current_time_with_tz() + dt_timedelta(seconds=SET_EXPIRE_SECONDS),
+            )
+            await self.__db.expire(str(merged_set_id), SET_EXPIRE_SECONDS)  # set auto expiration of merged set
+            return merged_set_id
+        except RedisError as e:
+            logging.error('On redis fetching error occurred, details: %s', str(e))
+            raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
+
+    async def fetch_union_records(self, set_id: K, *set_ids_to_union: K) -> AsyncGenerator[T, None]:
+        remove_set, fetching_set = False, set_id
+        if len(set_ids_to_union):
+            fetching_set = await self.__merge_sets(set_id, *set_ids_to_union)
+            remove_set = True
+        try:
+            async for record in self.fetch_records(fetching_set):
+                yield record
+        finally:
+            if remove_set:
+                # Explicitly remove temporarily set
+                await self.remove_set(fetching_set)
+
+
+class IpAddressRedisSetDB(RedisUnionSetDB[UUID, IPv4Address]):
     service_type = IPv4Address
     new_id_creator = uuid4
 
 
-class IpNetworkRedisSetDB(RedisSetDB[UUID, IPv4Network]):
+class IpNetworkRedisSetDB(RedisUnionSetDB[UUID, IPv4Network]):
     service_type = IPv4Network
     new_id_creator = uuid4
 

@@ -48,7 +48,8 @@ async def get_banned_addresses(redis_client_obj: RedisAsyncio, query_params: dic
         service_obj = BlackListAddressesSetDBService(IpAddressRedisSetDB(redis_client_obj))
         filter_records = query_params.pop('filter_records')
         # TODO There's no need to get all records. We can fetch them for further filtering and return them without
-        # memory utilization
+        # memory utilization and get the right records count
+        # At the moment some records might be truncated with following filtering
         banned_records = await service_obj.get_records(**query_params)
         if filter_records:
             # filter by allowed IPs
