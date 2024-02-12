@@ -16,30 +16,30 @@ from redis.asyncio import Redis as RedisAsyncio
 from redis.asyncio import RedisError
 
 from src.core.settings import SET_EXPIRE_SECONDS
-from src.models.abstract_types import K
-from src.models.abstract_types import T
-from src.models.abstract_types import TypeT
+from src.schemas.abstract_types import K
+from src.schemas.abstract_types import TypeV
+from src.schemas.abstract_types import V
 from src.utils.time_utils import get_current_time_with_tz
 
-from .abstract_set_db import AbstractDBSet
-from .abstract_set_db import AbstractSetDbError
+from .abstract_set_db import AbstractSetDB
+from .abstract_set_db import AbstractSetDBError
 from .abstract_set_db import AbstractUnionDBSet
 
 
-class RedisSetDBError(AbstractSetDbError):
+class RedisSetDBError(AbstractSetDBError):
     pass
 
 
-class RedisSetDB(AbstractDBSet, Generic[K, T]):
+class RedisSetDB(AbstractSetDB, Generic[K, V]):
     """Redis DB Storage with Sets"""
 
-    service_type: TypeT
+    service_type: TypeV
     new_id_creator: Callable[[], K]
 
     def __init__(self, db: RedisAsyncio):
         self.__db: RedisAsyncio = db
 
-    async def del_from_set(self, set_id: K, deleted_data: Iterable[T]) -> int:
+    async def del_from_set(self, set_id: K, deleted_data: Iterable[V]) -> int:
         """Asynchronously delete data from Redis set"""
         str_set_id: str = str(set_id)
         deleted_data_t = tuple(str(x) for x in deleted_data)
@@ -50,7 +50,7 @@ class RedisSetDB(AbstractDBSet, Generic[K, T]):
             logging.error('On redis set deletion operation error occurred, details: %s', str(e))
             raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
-    async def write_to_set(self, set_id: K, changed_data: Iterable[T]) -> int:
+    async def write_to_set(self, set_id: K, changed_data: Iterable[V]) -> int:
         """Asynchronously write data to Redis set"""
         str_set_id: str = str(set_id)
         changed_data_t = tuple(str(x) for x in changed_data)
@@ -61,7 +61,7 @@ class RedisSetDB(AbstractDBSet, Generic[K, T]):
             logging.error('On redis set write operation error occurred, details: %s', str(e))
             raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
-    async def fetch_records(self, set_id: K) -> AsyncGenerator[T, None]:
+    async def fetch_records(self, set_id: K) -> AsyncGenerator[V, None]:
         """Fetch from one set (default option)"""
         str_set_id = str(set_id)
         try:
@@ -92,7 +92,7 @@ class RedisSetDB(AbstractDBSet, Generic[K, T]):
             raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
 
-class RedisUnionSetDB(AbstractUnionDBSet, RedisSetDB, Generic[K, T]):
+class RedisUnionSetDB(AbstractUnionDBSet, RedisSetDB, Generic[K, V]):
     def __init__(self, db: RedisAsyncio):
         super().__init__(db)
         self.__db = db
@@ -118,7 +118,7 @@ class RedisUnionSetDB(AbstractUnionDBSet, RedisSetDB, Generic[K, T]):
             logging.error('On redis fetching error occurred, details: %s', str(e))
             raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
-    async def fetch_union_records(self, set_id: K, *set_ids_to_union: K) -> AsyncGenerator[T, None]:
+    async def fetch_union_records(self, set_id: K, *set_ids_to_union: K) -> AsyncGenerator[V, None]:
         remove_set, fetching_set = False, set_id
         if len(set_ids_to_union):
             fetching_set = await self.__merge_sets(set_id, *set_ids_to_union)

@@ -9,8 +9,8 @@ from typing import cast
 from uuid import UUID
 
 from src.core.settings import BATCH_SIZE
-from src.db.abstract_set_db import AbstractDBSet
-from src.models.abstract_types import T
+from src.db.abstract_set_db import AbstractSetDB
+from src.schemas.abstract_types import T
 
 
 async def iter_over_records(iter_records: list[T]) -> AsyncGenerator[tuple[int, T], None]:
@@ -29,8 +29,8 @@ class AbstractSetDBService(Generic[T]):
 
     class_set_id: UUID
 
-    def __init__(self, db_set: AbstractDBSet, set_id: Optional[UUID] = None):
-        self.__db_set: AbstractDBSet = db_set
+    def __init__(self, db_set: AbstractSetDB, set_id: Optional[UUID] = None):
+        self.__db_set: AbstractSetDB = db_set
         self.__set_id: UUID = set_id if set_id is not None else self.class_set_id
 
     async def fetch_records(self, records_count: int = 0, all_records: bool = True) -> AsyncGenerator[T, None]:

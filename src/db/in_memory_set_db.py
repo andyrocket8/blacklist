@@ -3,14 +3,14 @@ from typing import AsyncGenerator
 from typing import Generic
 from typing import Iterable
 
-from src.models.abstract_types import K
-from src.models.abstract_types import T
+from src.schemas.abstract_types import K
+from src.schemas.abstract_types import V
 
-from .abstract_set_db import AbstractDBSet
+from .abstract_set_db import AbstractSetDB
 from .abstract_set_db import AbstractUnionDBSet
 
 
-class InMemoryDBSet(AbstractDBSet, Generic[K, T]):
+class InMemorySetDB(AbstractSetDB, Generic[K, V]):
     """
     InMemory DB Storage with Sets.
     !!! Attention. This DB Storage is for testing purposes only. Do not use in any other cases.
@@ -21,12 +21,12 @@ class InMemoryDBSet(AbstractDBSet, Generic[K, T]):
 
     def __init__(self):
         # initialize internal set storage
-        self.__data: dict[K, set[T]] = {}
+        self.__data: dict[K, set[V]] = {}
 
-    def get_set(self, set_id: K, create_on_empty: bool = False) -> set[T]:
+    def get_set(self, set_id: K, create_on_empty: bool = False) -> set[V]:
         """Get set from storage, create if not exists (on create_on_empty == True)"""
         if set_id not in self.__data:
-            empty_set: set[T] = set()
+            empty_set: set[V] = set()
             if create_on_empty:
                 self.__data[set_id] = empty_set
             else:
@@ -38,7 +38,7 @@ class InMemoryDBSet(AbstractDBSet, Generic[K, T]):
         if set_id in self.__data:
             del self.__data[set_id]
 
-    async def write_to_set(self, set_id: K, changed_data: Iterable[T]) -> int:
+    async def write_to_set(self, set_id: K, changed_data: Iterable[V]) -> int:
         set_data = self.get_set(set_id, create_on_empty=True)
         records_count = 0
         for elem in changed_data:
@@ -48,7 +48,7 @@ class InMemoryDBSet(AbstractDBSet, Generic[K, T]):
                 await sleep(0)
         return records_count
 
-    async def del_from_set(self, set_id: K, deleted_data: Iterable[T]) -> int:
+    async def del_from_set(self, set_id: K, deleted_data: Iterable[V]) -> int:
         set_data = self.get_set(set_id)
         records_count = 0
         for elem in deleted_data:
@@ -60,7 +60,7 @@ class InMemoryDBSet(AbstractDBSet, Generic[K, T]):
             self.remove_set(set_id)
         return records_count
 
-    async def fetch_records(self, set_id: K) -> AsyncGenerator[T, None]:
+    async def fetch_records(self, set_id: K) -> AsyncGenerator[V, None]:
         set_data = self.get_set(set_id)
         for elem in set_data:
             yield elem
@@ -71,8 +71,8 @@ class InMemoryDBSet(AbstractDBSet, Generic[K, T]):
         return len(self.__data[set_id]) if set_id in self.__data else 0
 
 
-class InMemoryUnionDBSet(AbstractUnionDBSet, InMemoryDBSet, Generic[K, T]):
-    async def fetch_union_records(self, set_id: K, *set_ids_to_union: K) -> AsyncGenerator[T, None]:
+class InMemoryUnionDBSet(AbstractUnionDBSet, InMemorySetDB, Generic[K, V]):
+    async def fetch_union_records(self, set_id: K, *set_ids_to_union: K) -> AsyncGenerator[V, None]:
         set_data = self.get_set(set_id)
         for union_set_id in set_ids_to_union:
             # need some merge operation
