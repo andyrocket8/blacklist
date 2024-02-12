@@ -41,17 +41,19 @@ class InMemoryListDB(AbstractListWithTransformDB[TransT, Internal], ABC, Generic
                 yield self.transform_to_user(value)
                 await sleep(0)
 
-    async def add_member(self, list_name: str, value: TransT) -> int:
+    async def add_member(self, list_name: str, value: TransT, unique: bool = False) -> int:
         """Add member to list. If list does not exist it should be created
         Return 1 if member has been actually added otherwise 0
+        set 'unique' to True if we need only unique values in list
         """
         processed_list: Optional[list[Internal]] = self.__storage.get(list_name, None)
         if processed_list is None:
             # create new list in storage
             processed_list = list[Internal]()
             self.__storage[list_name] = processed_list
-        if value not in processed_list:
-            processed_list.append(self.transform_to_storage(value))
+        transformed = self.transform_to_storage(value)
+        if not unique or transformed not in processed_list:  # check whether we should deduplicate records
+            processed_list.append(transformed)
             return 1
         return 0
 
@@ -62,6 +64,10 @@ class InMemoryListDB(AbstractListWithTransformDB[TransT, Internal], ABC, Generic
             processed_list.remove(transformed_value)
             return 1
         return 0
+
+    async def count(self, list_name: str) -> int:
+        processed_list: Optional[list[Internal]] = self.__storage.get(list_name, None)
+        return len(processed_list) if processed_list is not None else 0
 
     def transform_to_storage(self, value: TransT) -> Internal:
         return value.transform_to_storage(value)

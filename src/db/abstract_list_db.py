@@ -18,6 +18,8 @@ class AbstractListDB(ABC, Generic[T]):
     """Abstract DB Connector with List Features implementation
     Assume that set is created on first write operation
     T: external type of list entities
+
+    Note that we hide storage structure from
     """
 
     @abstractmethod
@@ -37,7 +39,7 @@ class AbstractListDB(ABC, Generic[T]):
         yield cast(T, None)  # patch for mypy warnings on incompatible type (do not do this in nested implementations)
 
     @abstractmethod
-    async def add_member(self, list_name: str, value: T) -> int:
+    async def add_member(self, list_name: str, value: T, unique: bool = False) -> int:
         """Add member to list. If list does not exist it should be created
         Return 1 if member has been actually added otherwise 0
         """
@@ -45,6 +47,11 @@ class AbstractListDB(ABC, Generic[T]):
 
     @abstractmethod
     async def del_member(self, list_name: str, value: T) -> int:
+        pass
+
+    @abstractmethod
+    async def count(self, list_name) -> int:
+        """Count members in list"""
         pass
 
 

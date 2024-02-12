@@ -10,7 +10,7 @@ from .abstract_set_db import AbstractSetDB
 from .abstract_set_db import AbstractUnionSetDB
 
 
-class InMemorySetDB(AbstractSetDB, Generic[K, V]):
+class InMemorySetDB(AbstractSetDB[K, V], Generic[K, V]):
     """
     InMemory DB Storage with Sets.
     !!! Attention. This DB Storage is for testing purposes only. Do not use in any other cases.
@@ -29,11 +29,10 @@ class InMemorySetDB(AbstractSetDB, Generic[K, V]):
             empty_set: set[V] = set()
             if create_on_empty:
                 self.__data[set_id] = empty_set
-            else:
-                return empty_set
+            return empty_set
         return self.__data[set_id]
 
-    def remove_set(self, set_id: K):
+    async def remove_set(self, set_id: K):
         """Remove set from storage"""
         if set_id in self.__data:
             del self.__data[set_id]
@@ -57,7 +56,7 @@ class InMemorySetDB(AbstractSetDB, Generic[K, V]):
                 records_count += 1
                 await sleep(0)
         if len(set_data) == 0:
-            self.remove_set(set_id)
+            await self.remove_set(set_id)
         return records_count
 
     async def fetch_records(self, set_id: K) -> AsyncGenerator[V, None]:
@@ -70,8 +69,15 @@ class InMemorySetDB(AbstractSetDB, Generic[K, V]):
         """Get records count from set"""
         return len(self.__data[set_id]) if set_id in self.__data else 0
 
+    async def contains(self, set_id: K, value: V) -> bool:
+        """Check whether value is in set"""
+        set_data = self.get_set(set_id)
+        return value in set_data
 
-class InMemoryUnionSetDB(AbstractUnionSetDB, InMemorySetDB, Generic[K, V]):
+
+class InMemoryUnionSetDB(InMemorySetDB[K, V], AbstractUnionSetDB[K, V], Generic[K, V]):
+    """Extend with Union Set functionality"""
+
     async def fetch_union_records(self, set_id: K, *set_ids_to_union: K) -> AsyncGenerator[V, None]:
         set_data = self.get_set(set_id)
         for union_set_id in set_ids_to_union:

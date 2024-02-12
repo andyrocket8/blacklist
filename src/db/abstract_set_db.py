@@ -51,8 +51,13 @@ class AbstractSetDB(ABC, Generic[K, V]):
         """Remove set from DB"""
         pass
 
+    @abstractmethod
+    async def contains(self, set_id: K, value: V) -> bool:
+        """Check whether value is in set"""
+        pass
 
-class AbstractUnionSetDB(ABC, Generic[K, V]):
+
+class AbstractUnionSetInterface(ABC, Generic[K, V]):
     """Interface with union read operations"""
 
     @abstractmethod
@@ -64,3 +69,9 @@ class AbstractUnionSetDB(ABC, Generic[K, V]):
         # Emulate async generator behaviour in abstract method
         await asyncio.sleep(0)  # calling awaitable
         yield cast(V, None)  # patch for mypy warnings on incompatible type (do not do this in nested implementations)
+
+
+class AbstractUnionSetDB(AbstractSetDB[K, V], AbstractUnionSetInterface[K, V], ABC, Generic[K, V]):
+    """Composite class with union feature"""
+
+    pass

@@ -34,7 +34,6 @@ class RedisSetDB(AbstractSetDB, Generic[K, V]):
     """Redis DB Storage with Sets"""
 
     service_type: TypeV
-    new_id_creator: Callable[[], K]
 
     def __init__(self, db: RedisAsyncio):
         self.__db: RedisAsyncio = db
@@ -61,12 +60,17 @@ class RedisSetDB(AbstractSetDB, Generic[K, V]):
             logging.error('On redis set write operation error occurred, details: %s', str(e))
             raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
+    def create_instance(self, value: Any) -> V:
+        """Create instance of type V here"""
+        return self.service_type(*[value])  # perform ServiceType instantiation here
+
     async def fetch_records(self, set_id: K) -> AsyncGenerator[V, None]:
         """Fetch from one set (default option)"""
         str_set_id = str(set_id)
         try:
             async for record in self.__db.sscan_iter(name=str_set_id, match='*'):
-                yield self.service_type(*[record])  # perform ServiceType instantiation here
+                yield self.create_instance(record)
+
         except RedisError as e:
             logging.error('On redis fetching error occurred, details: %s', str(e))
             raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
@@ -91,8 +95,15 @@ class RedisSetDB(AbstractSetDB, Generic[K, V]):
             logging.error('On redis counting set size error occurred, details: %s', str(e))
             raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
+    async def contains(self, set_id: K, value: V) -> bool:
+        """Check whether value is in certain Redis set"""
+        str_set_id: str = str(set_id)
+        return await cast(Awaitable[Any], self.__db.sismember(str_set_id, str(value))) == 1
 
-class RedisUnionSetDB(AbstractUnionSetDB, RedisSetDB, Generic[K, V]):
+
+class RedisUnionSetDB(RedisSetDB[K, V], AbstractUnionSetDB[K, V], Generic[K, V]):
+    key_factory: Callable[[], K]  # factory method for creating keys for merged sets
+
     def __init__(self, db: RedisAsyncio):
         super().__init__(db)
         self.__db = db
@@ -101,7 +112,7 @@ class RedisUnionSetDB(AbstractUnionSetDB, RedisSetDB, Generic[K, V]):
         """Merge sets and return set ID"""
 
         sets_to_merge: tuple[str, ...] = (str(set_id),) + tuple([str(x) for x in set_ids_to_union])
-        merged_set_id = self.new_id_creator()
+        merged_set_id = self.key_factory()
         try:
             logging.debug('Merging sets to new, set ID: %s', merged_set_id)
             records_merged: int = await cast(
@@ -134,14 +145,13 @@ class RedisUnionSetDB(AbstractUnionSetDB, RedisSetDB, Generic[K, V]):
 
 class IpAddressRedisSetDB(RedisUnionSetDB[UUID, IPv4Address]):
     service_type = IPv4Address
-    new_id_creator = uuid4
+    key_factory = uuid4
 
 
 class IpNetworkRedisSetDB(RedisUnionSetDB[UUID, IPv4Network]):
     service_type = IPv4Network
-    new_id_creator = uuid4
+    key_factory = uuid4
 
 
 class UUIDRedisSetDB(RedisSetDB[UUID, UUID]):
     service_type = UUID
-    new_id_creator = uuid4

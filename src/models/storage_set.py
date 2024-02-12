@@ -7,7 +7,7 @@ from .transformation import Transformation
 @dataclass
 class StorageSet(Transformation['StorageSet', str]):
     """Simple 'to str' dataclass transformation implementation, avoid ':' in set name
-    Suitable for use with Redis lists
+    Suitable for use with Redis entities (lists, sets, etc)
     """
 
     set_name: str
