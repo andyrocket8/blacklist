@@ -1,4 +1,4 @@
-# Testing InMemoryDBSet with IPv4Address entities
+# Testing InMemoryUnionSetDB with IPv4Address entities
 from dataclasses import dataclass
 from ipaddress import IPv4Address
 from typing import Iterable
@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 
-from src.db.in_memory_set_db import InMemoryUnionDBSet
+from src.db.in_memory_set_db import InMemoryUnionSetDB
 
 
 @dataclass
@@ -62,7 +62,7 @@ def ip_addresses_data_three() -> FixtureSet:
 
 @pytest.mark.asyncio
 async def test_in_memory_db_set(ip_addresses_data_one, ip_addresses_data_two, ip_addresses_data_three):
-    db_set = InMemoryUnionDBSet[UUID, IPv4Address]()
+    db_set = InMemoryUnionSetDB[UUID, IPv4Address]()
     # Check correct implementation of 'write_set' and 'count' methods for all test sets
     for set_number, set_data in enumerate(
         (

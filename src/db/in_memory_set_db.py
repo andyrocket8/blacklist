@@ -7,7 +7,7 @@ from src.schemas.abstract_types import K
 from src.schemas.abstract_types import V
 
 from .abstract_set_db import AbstractSetDB
-from .abstract_set_db import AbstractUnionDBSet
+from .abstract_set_db import AbstractUnionSetDB
 
 
 class InMemorySetDB(AbstractSetDB, Generic[K, V]):
@@ -16,7 +16,7 @@ class InMemorySetDB(AbstractSetDB, Generic[K, V]):
     !!! Attention. This DB Storage is for testing purposes only. Do not use in any other cases.
 
     For use with UUIDs as set IDs and IP addresses as values instantiate as
-    obj = InMemoryDBSet[UUID, IpV4Address]
+    obj = InMemorySetDB[UUID, IpV4Address]
     """
 
     def __init__(self):
@@ -71,7 +71,7 @@ class InMemorySetDB(AbstractSetDB, Generic[K, V]):
         return len(self.__data[set_id]) if set_id in self.__data else 0
 
 
-class InMemoryUnionDBSet(AbstractUnionDBSet, InMemorySetDB, Generic[K, V]):
+class InMemoryUnionSetDB(AbstractUnionSetDB, InMemorySetDB, Generic[K, V]):
     async def fetch_union_records(self, set_id: K, *set_ids_to_union: K) -> AsyncGenerator[V, None]:
         set_data = self.get_set(set_id)
         for union_set_id in set_ids_to_union:

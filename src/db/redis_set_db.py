@@ -23,7 +23,7 @@ from src.utils.time_utils import get_current_time_with_tz
 
 from .abstract_set_db import AbstractSetDB
 from .abstract_set_db import AbstractSetDBError
-from .abstract_set_db import AbstractUnionDBSet
+from .abstract_set_db import AbstractUnionSetDB
 
 
 class RedisSetDBError(AbstractSetDBError):
@@ -92,7 +92,7 @@ class RedisSetDB(AbstractSetDB, Generic[K, V]):
             raise RedisSetDBError('Redis DB Error, details: {}'.format(str(e))) from None
 
 
-class RedisUnionSetDB(AbstractUnionDBSet, RedisSetDB, Generic[K, V]):
+class RedisUnionSetDB(AbstractUnionSetDB, RedisSetDB, Generic[K, V]):
     def __init__(self, db: RedisAsyncio):
         super().__init__(db)
         self.__db = db

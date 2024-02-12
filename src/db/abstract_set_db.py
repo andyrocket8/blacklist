@@ -52,8 +52,8 @@ class AbstractSetDB(ABC, Generic[K, V]):
         pass
 
 
-class AbstractUnionDBSet(ABC, Generic[K, V]):
-    """Extended AbstractDBSet with union read operations"""
+class AbstractUnionSetDB(ABC, Generic[K, V]):
+    """Interface with union read operations"""
 
     @abstractmethod
     async def fetch_union_records(self, set_id: K, *set_ids_to_union: K) -> AsyncGenerator[V, None]:
