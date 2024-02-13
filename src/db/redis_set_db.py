@@ -143,15 +143,25 @@ class RedisUnionSetDB(RedisSetDB[K, V], AbstractUnionSetDB[K, V], Generic[K, V])
                 await self.remove_set(fetching_set)
 
 
-class IpAddressRedisSetDB(RedisUnionSetDB[UUID, IPv4Address]):
+class IpAddressRedisSetDB(RedisSetDB[UUID, IPv4Address]):
     service_type = IPv4Address
     key_factory = uuid4
 
 
-class IpNetworkRedisSetDB(RedisUnionSetDB[UUID, IPv4Network]):
+class IpNetworkRedisSetDB(RedisSetDB[UUID, IPv4Network]):
     service_type = IPv4Network
     key_factory = uuid4
 
 
 class UUIDRedisSetDB(RedisSetDB[UUID, UUID]):
     service_type = UUID
+
+
+class IpAddressRedisUnionSetDB(RedisUnionSetDB[UUID, IPv4Address]):
+    service_type = IPv4Address
+    key_factory = uuid4
+
+
+class IpNetworkRedisUnionSetDB(RedisUnionSetDB[UUID, IPv4Network]):
+    service_type = IPv4Network
+    key_factory = uuid4
