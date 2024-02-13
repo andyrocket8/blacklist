@@ -11,9 +11,9 @@ from src.schemas.abstract_types import T
 class Transformation(ABC, Generic[T, Internal]):
     """Interface for transformation data within storage"""
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def transform_to_storage(value: T) -> Internal:
+    def transform_to_storage(cls, value: T) -> Internal:
         pass
 
     @classmethod
@@ -22,6 +22,6 @@ class Transformation(ABC, Generic[T, Internal]):
         pass
 
 
-# Base abstract class type definition for use in list storages
+# Base abstract class type definition for use in storages
 TransT = TypeVar('TransT', bound=Transformation)
 TypeTransT = Type[TransT]

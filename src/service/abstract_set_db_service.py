@@ -1,15 +1,12 @@
 import logging
-from typing import Any
 from typing import AsyncGenerator
-from typing import Awaitable
 from typing import Generic
 from typing import Optional
 from typing import TypeVar
-from typing import cast
 from uuid import UUID
 
 from src.core.settings import BATCH_SIZE
-from src.db.abstract_set_db import AbstractSetDB
+from src.db.base_set_db_entity import ISetDbEntity
 from src.schemas.abstract_types import T
 
 
@@ -29,13 +26,13 @@ class AbstractSetDBService(Generic[T]):
 
     class_set_id: UUID
 
-    def __init__(self, db_set: AbstractSetDB, set_id: Optional[UUID] = None):
-        self.__db_set: AbstractSetDB = db_set
+    def __init__(self, db_entity: ISetDbEntity[UUID, T], set_id: Optional[UUID] = None):
+        self.__db_entity: ISetDbEntity[UUID, T] = db_entity
         self.__set_id: UUID = set_id if set_id is not None else self.class_set_id
 
     async def fetch_records(self, records_count: int = 0, all_records: bool = True) -> AsyncGenerator[T, None]:
         current_record = 0
-        async for record in self.__db_set.fetch_records(self.__set_id):
+        async for record in self.__db_entity.fetch_records(self.__set_id):
             yield record
             if not all_records and records_count > 0:
                 current_record += 1
@@ -61,11 +58,11 @@ class AbstractSetDBService(Generic[T]):
         async for need_flush, record in iter_over_records(records):
             records_to_add.append(record)
             if need_flush:
-                iter_written = await self.__db_set.write_to_set(self.__set_id, records_to_add)
+                iter_written = await self.__db_entity.add_to_set(self.__set_id, records_to_add)
                 saved_records += iter_written
                 records_to_add = []
         if len(records_to_add):
-            iter_written = await self.__db_set.write_to_set(self.__set_id, records_to_add)
+            iter_written = await self.__db_entity.add_to_set(self.__set_id, records_to_add)
             saved_records += iter_written
         logging.debug('Actually wrote %d records to database', saved_records)
         return saved_records
@@ -79,18 +76,18 @@ class AbstractSetDBService(Generic[T]):
         async for need_flush, record in iter_over_records(records):
             records_to_delete.append(record)
             if need_flush:
-                iter_deleted = await self.__db_set.del_from_set(self.__set_id, records_to_delete)
+                iter_deleted = await self.__db_entity.del_from_set(self.__set_id, records_to_delete)
                 deleted_records += iter_deleted
                 records_to_delete = []
         if len(records_to_delete):
-            iter_deleted = await self.__db_set.del_from_set(self.__set_id, records_to_delete)
+            iter_deleted = await self.__db_entity.del_from_set(self.__set_id, records_to_delete)
             deleted_records += iter_deleted
         logging.debug('Total deleted %d records from database', deleted_records)
         return deleted_records
 
     async def count(self) -> int:
         logging.debug('Counting records in database, set ID: %s')
-        return await cast(Awaitable[Any], self.__db_set.count(self.__set_id))
+        return await self.__db_entity.count(self.__set_id)
 
 
 AbstractSetDBServiceType = TypeVar('AbstractSetDBServiceType', bound=AbstractSetDBService)

@@ -13,8 +13,8 @@ class StorageSet(Transformation['StorageSet', str]):
     set_name: str
     set_id: UUID
 
-    @staticmethod
-    def transform_to_storage(value: 'StorageSet') -> str:
+    @classmethod
+    def transform_to_storage(cls, value: 'StorageSet') -> str:
         assert ':' not in value.set_name, f'Not allowed : in passed set name {value.set_name!r}'
         return f'{value.set_name}:{str(value.set_id)}'
 

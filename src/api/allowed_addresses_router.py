@@ -8,7 +8,8 @@ from fastapi.security import HTTPAuthorizationCredentials
 
 from src.db.redis_db import RedisAsyncio
 from src.db.redis_db import redis_client
-from src.db.redis_set_db import IpAddressRedisSetDB
+from src.db.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
+from src.db.set_db_entity_str_adapter import SetDbEntityStrAdapterIpAddress
 from src.schemas.addresses_schemas import AgentAddressesInfo
 from src.schemas.addresses_schemas import IpV4AddressList
 from src.schemas.common_response_schemas import AddResponseSchema
@@ -32,7 +33,9 @@ async def get_allowed_addresses(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     query_params: Annotated[dict, Depends(get_query_params)],
 ):
-    service_obj = AllowedAddressesSetDBService(IpAddressRedisSetDB(redis_client_obj))
+    service_obj = AllowedAddressesSetDBService(
+        SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(redis_client_obj))
+    )
     return await service_obj.get_records(**query_params)
 
 
@@ -42,7 +45,9 @@ async def save_allowed_addresses(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     auth: Optional[HTTPAuthorizationCredentials] = Depends(allowed_addresses_auth_check),  # noqa: B008
 ):
-    service_obj = AllowedAddressesSetDBService(IpAddressRedisSetDB(redis_client_obj))
+    service_obj = AllowedAddressesSetDBService(
+        SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(redis_client_obj))
+    )
     added_count = await service_obj.write_records(agent_info.addresses)
     return AddResponseSchema(added=added_count)
 
@@ -53,7 +58,9 @@ async def delete_allowed_addresses(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     auth: Optional[HTTPAuthorizationCredentials] = Depends(allowed_addresses_auth_check),  # noqa: B008
 ):
-    service_obj = AllowedAddressesSetDBService(IpAddressRedisSetDB(redis_client_obj))
+    service_obj = AllowedAddressesSetDBService(
+        SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(redis_client_obj))
+    )
     deleted_count = await service_obj.del_records(agent_info.addresses)
     return DeleteResponseSchema(deleted=deleted_count)
 
@@ -62,6 +69,8 @@ async def delete_allowed_addresses(
 async def count_allowed_addresses(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
-    service_obj = AllowedAddressesSetDBService(IpAddressRedisSetDB(redis_client_obj))
+    service_obj = AllowedAddressesSetDBService(
+        SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(redis_client_obj))
+    )
     count = await service_obj.count()
     return CountResponseSchema(count=count)
