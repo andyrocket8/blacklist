@@ -1,15 +1,8 @@
-from dataclasses import dataclass
-from typing import Generic
-
 from src.db.base_set_db_entity import ISetDbEntity
 from src.schemas.abstract_types import K
 from src.schemas.abstract_types import V
 
-
-@dataclass(frozen=True)
-class SetTestData(Generic[K, V]):
-    set_id: K
-    set_data: tuple[V, ...]
+from .test_set_db_classes import SetTestData
 
 
 async def check_sets_count(
