@@ -36,8 +36,8 @@ class MemorySetDbEntityAdapter(ISetDbEntity[K, V], Generic[K, V]):
     async def count(self, set_id: K) -> int:
         """Get records count from set"""
         logging.debug('Counting records in Memory database, set ID: %s', set_id)
-        return await self.__storage.count(set_id)
+        return self.__storage.count(set_id)
 
     async def contains(self, set_id: K, value: V) -> bool:
         """Check whether set contains value from set"""
-        return await self.__storage.contains(set_id, value)
+        return self.__storage.contains(set_id, value)

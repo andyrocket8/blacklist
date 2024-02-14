@@ -11,9 +11,6 @@ class BaseSetDb(ISetDbAdapter[K], Generic[K]):
     def __init__(self, set_db_adapter: ISetDbAdapter[K]):
         self.__set_db_adapter = set_db_adapter
 
-    async def add_set(self, set_id: K) -> int:
-        return await self.__set_db_adapter.add_set(set_id)
-
     async def del_set(self, set_id: K) -> int:
         return await self.__set_db_adapter.del_set(set_id)
 

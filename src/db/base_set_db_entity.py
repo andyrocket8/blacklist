@@ -7,18 +7,15 @@ from typing import AsyncGenerator
 from typing import Generic
 from typing import Iterable
 from typing import Type
-from typing import TypeVar
 from typing import cast
 
 from src.models.transformation import Transformation
 from src.schemas.abstract_types import K
+from src.schemas.abstract_types import KInternal
 from src.schemas.abstract_types import V
+from src.schemas.abstract_types import VInternal
 
 from .base_set_db_adapter import SetDbError
-
-# TypeVars for Internal DB types
-KInternal = TypeVar('KInternal')
-VInternal = TypeVar('VInternal')
 
 
 class SetDbIdentityError(SetDbError):

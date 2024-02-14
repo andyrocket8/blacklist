@@ -26,6 +26,7 @@ def load_version(file_name: Union[str, Path]) -> Version:
             config = tomllib.load(f)
         version = config['tool']['poetry']['version']
         parsed_version = version.split('.')
+        assert len(parsed_version) == 3, f'Wrong version definition in {file_name}'
         return Version(major=int(parsed_version[0]), minor=int(parsed_version[1]), patch=int(parsed_version[2]))
     except IOError as e:
         print(f'Error while loading {file_name} file, current_path: {current_path},  details: {str(e)}')

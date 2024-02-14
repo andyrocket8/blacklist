@@ -17,10 +17,6 @@ class ISetDbAdapter(ABC, Generic[K]):
     """Interface for sets management"""
 
     @abstractmethod
-    async def add_set(self, set_id: K) -> int:
-        pass
-
-    @abstractmethod
     async def del_set(self, set_id: K) -> int:
         pass
 
@@ -38,9 +34,6 @@ class BaseSetDbAdapter(ISetDbAdapter[K], Generic[K]):
 
     def __init__(self, storage: ISetDbAdapter[K]):
         self.__storage: ISetDbAdapter[K] = storage
-
-    async def add_set(self, set_id: K) -> int:
-        return await self.__storage.add_set(set_id)
 
     async def del_set(self, set_id: K) -> int:
         return await self.__storage.del_set(set_id)

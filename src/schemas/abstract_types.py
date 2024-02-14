@@ -1,4 +1,4 @@
-from typing import Hashable
+from collections.abc import Hashable
 from typing import Type
 from typing import TypeVar
 
@@ -17,3 +17,7 @@ TypeV = Type[V]
 # Abstract type for storages
 Internal = TypeVar('Internal')
 TypeInternal = Type[Internal]
+
+# TypeVars for Internal DB types
+KInternal = TypeVar('KInternal', bound=Hashable)
+VInternal = TypeVar('VInternal')
