@@ -55,9 +55,14 @@ async def test_memory_set_storage(person_data_set_1, person_data_set_2):
 
     # add data to storage
     set_1_id = person_data_set_1.set_id
-    await simple_ms_obj.write_to_set(set_1_id, person_data_set_1.values)
+    result = await simple_ms_obj.write_to_set(set_1_id, person_data_set_1.values)
+    assert result == len(person_data_set_1.values), 'Expect to write all set values to storage'
     set_2_id = person_data_set_2.set_id
-    await simple_ms_obj.write_to_set(set_2_id, person_data_set_2.values)
+    result = await simple_ms_obj.write_to_set(set_2_id, person_data_set_2.values)
+    assert result == len(person_data_set_2.values), 'Expect to write all set values to storage'
+    # write to already filled set
+    result = await simple_ms_obj.write_to_set(set_2_id, person_data_set_2.values)
+    assert result == 0, 'Expect to skip writing of all set values to storage'
     # checking storage existence with exists operation (existent set)
     assert simple_ms_obj.exists(set_1_id) == 1, 'exists should return 1 for existent set (1)'
     assert simple_ms_obj.exists(set_2_id) == 1, 'exists should return 1 for existent set (2)'

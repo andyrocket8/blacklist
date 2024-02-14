@@ -7,6 +7,7 @@ from src.schemas.abstract_types import K
 from src.schemas.abstract_types import V
 
 from .base_set_db_adapter import ISetDbAdapter
+from .base_set_db_entity import ISetDbEntity
 
 
 class MemorySetStorage(Generic[K, V]):
@@ -82,7 +83,12 @@ class MemorySetStorage(Generic[K, V]):
         set_data = self.get_set(set_id)
         return value in set_data
 
-    def adapter(self) -> ISetDbAdapter[K]:
+    def set_db_adapter(self) -> ISetDbAdapter[K]:
         from .memory_set_db_adapter import MemorySetDbAdapter
 
         return MemorySetDbAdapter(self)
+
+    def set_db_entity_adapter(self) -> ISetDbEntity[K, V]:
+        from .memory_set_db_entity_adapter import MemorySetDbEntityAdapter
+
+        return MemorySetDbEntityAdapter[K, V](self)
