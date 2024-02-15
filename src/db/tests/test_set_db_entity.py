@@ -10,6 +10,10 @@ from .test_set_db_classes import Car
 from .test_set_db_classes import SetDbEntityStrCarAdapter
 
 
+def test_redis_config(redis_env_for_test):
+    print(f'Redis config now: {redis_env_for_test}')
+
+
 @pytest.mark.asyncio
 async def test_typed_memory_set_db(car_set_test_data, car_set_absent_test_data):
     # TODO refactor to pytest fixtures

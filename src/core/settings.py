@@ -35,3 +35,7 @@ MAX_STORAGE_LIST_SIZE = 10
 
 # History param detection mask
 HISTORY_TIMEDELTA_MASK = r'^([0-9]+)([smhd]{1})$'
+
+
+# Redis container name with tag
+REDIS_DOCKER_IMAGE_NAME = 'redis:7.2.3-alpine3.18'

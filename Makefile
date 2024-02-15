@@ -30,7 +30,7 @@ _check:
 		flake8 -v --config setup.cfg
 		mypy .
 		black .
-		pytest
+		pytest -s
 
 _start_dev:
 		# echo "set -a && source compose-redis.env && docker compose -f docker-compose-dev.yml up -d --build" | bash
