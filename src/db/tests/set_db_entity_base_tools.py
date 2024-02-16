@@ -53,15 +53,17 @@ async def run_test_set_db_entity(
     :param set_db_entity_absent_data: list of entities that should be absent in storage
     :param set_db_entity_obj: set_db_entity object
     :return: None
+
+    Attention: on function change don't forget to change following 'teardown_set_db_entity' function
     """
     assert len(set_db_entity_test_data) > 2, 'Test data length should be greater than 2'
     assert len(set_db_entity_absent_data) > 2, 'Test data ob absent records should be greater than 2'
-    # Add data of first test set to ISetDbEntity
+    # Add data of all test sets to ISetDbEntity
     for step, test_record in enumerate(set_db_entity_test_data):
         records_added = await set_db_entity_obj.add_to_set(test_record.set_id, test_record.set_data)
         assert records_added == len(test_record.set_data), f'Expect to write all set data to set (Step {step})'
     for test_record in set_db_entity_test_data:
-        # check cets consistency
+        # check sets consistency
         await check_set_consistency(set_db_entity_obj, test_record, set_db_entity_absent_data)
         # testing storage consistency
         await check_sets_count(set_db_entity_obj, test_record, 0)
@@ -81,8 +83,9 @@ async def run_test_set_db_entity(
             assert not await set_db_entity_obj.contains(
                 test_record.set_id, absent_record
             ), f'Expect absense of record {absent_record} in storage data, (Step {step})'
-    # Testing addition of duplicated data (on set 1)
-    # First of all add one record
+    # Testing addition of extra and duplicated data (on set 1)
+    # First of all add one record. We add dada from set_db_entity_absent_data, so on teardown operation we should
+    # clear added records
     test_record = set_db_entity_test_data[0]
     new_record_1 = set_db_entity_absent_data[0]
     records_added = await set_db_entity_obj.add_to_set(test_record.set_id, [new_record_1])
@@ -128,3 +131,18 @@ async def run_test_set_db_entity(
     records_deleted = await set_db_entity_obj.del_from_set(modified_data.set_id, deleted_data)
     assert records_deleted == 3, 'Expect deletion of first element of test set 1 and a couple of absent data'
     await check_set_consistency(set_db_entity_obj, modified_data, modified_entity_absent_data)
+
+
+async def teardown_test_set_db_entity(
+    set_db_entity_test_data: list[SetTestData[K, V]],
+    set_db_entity_absent_data: list[V],
+    set_db_entity_obj: ISetDbEntity[K, V],
+):
+    for set_data in set_db_entity_test_data:
+        if await set_db_entity_obj.count(set_data.set_id) > 0:
+            # remove all expected set data from set
+            await set_db_entity_obj.del_from_set(set_data.set_id, set_data.set_data)
+            # erase all that was added from set_db_entity_absent_data
+            await set_db_entity_obj.del_from_set(set_data.set_id, set_db_entity_absent_data)
+            # assure that all records are eliminated
+            assert await set_db_entity_obj.count(set_data.set_id) == 0, 'Unsuccessful set erasing operation'

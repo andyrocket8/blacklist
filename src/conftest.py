@@ -3,6 +3,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime as dt_datetime
 from pathlib import Path
+from time import sleep as time_sleep
 from typing import Generator
 from typing import Optional
 
@@ -50,6 +51,13 @@ def redis_env_for_test() -> Generator[RedisForTestConfig, None, None]:
         if return_code:
             logging_sp_exec_error(start_redis_command, return_code, output)
             raise RedisTestServerError('Error on starting test redis server')
+        else:
+            # dumb pause to avoid starting tests before redis bootstrap finishes
+            # sleep for 5 seconds to make sure redis container finished bootstrap routines.
+            print('Waiting for redis to start (5 seconds)')
+            for _i in range(5):
+                print('...')
+                time_sleep(1)
         logging.debug('Test redis server started')
         # Now fill in the Redis config options. Extract RedisConfig data from RedisForTestSettings
         yield RedisForTestConfig(True, RedisConfig(**redis_for_test_settings.model_dump()))
