@@ -8,8 +8,8 @@ from fastapi.exceptions import HTTPException
 from fastapi.routing import APIRouter
 from redis.exceptions import RedisError
 
-from src.db.redis_db import RedisAsyncio
-from src.db.redis_db import redis_client
+from src.db.storages.redis_db import RedisAsyncio
+from src.db.storages.redis_db import redis_client
 from src.schemas.ping_schemas import PingResponse
 
 api_router = APIRouter()

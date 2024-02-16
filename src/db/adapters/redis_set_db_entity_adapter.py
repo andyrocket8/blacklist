@@ -8,8 +8,8 @@ from typing import cast
 from redis.asyncio import Redis as RedisAsyncio
 from redis.asyncio import RedisError
 
-from .base_set_db_entity import ISetDbEntity
-from .base_set_db_entity import SetDbIdentityError
+from src.db.base_set_db_entity import ISetDbEntity
+from src.db.base_set_db_entity import SetDbIdentityError
 
 
 class RedisSetDbEntityAdapter(ISetDbEntity[str, str]):

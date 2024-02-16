@@ -9,8 +9,8 @@ from fastapi import status
 from fastapi.exceptions import HTTPException
 from fastapi.routing import APIRouter
 
-from src.db.redis_db import RedisAsyncio
-from src.db.redis_db import redis_client
+from src.db.storages.redis_db import RedisAsyncio
+from src.db.storages.redis_db import redis_client
 from src.models.query_params_models import HistoryQueryParams
 from src.schemas.base_input_schema import now_cur_tz
 from src.schemas.usage_schemas import AddressHistoryRecord

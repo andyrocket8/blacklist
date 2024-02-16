@@ -9,7 +9,7 @@ from typing import TypeVar
 from typing import cast
 from uuid import UUID
 
-from src.db.redis_db import RedisAsyncio
+from src.db.storages.redis_db import RedisAsyncio
 
 T = TypeVar('T')
 TypeT = Type[T]

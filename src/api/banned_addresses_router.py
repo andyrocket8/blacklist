@@ -14,11 +14,11 @@ from src.core.settings import ACTIVE_USAGE_INFO
 from src.core.settings import BACKGROUND_ADD_RECORDS
 from src.core.settings import BACKGROUND_DELETE_RECORDS
 from src.core.settings import HISTORY_USAGE_INFO
-from src.db.redis_db import RedisAsyncio
-from src.db.redis_db import redis_client
-from src.db.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
-from src.db.set_db_entity_str_adapter import SetDbEntityStrAdapterIpAddress
-from src.db.set_db_entity_str_adapter import SetDbEntityStrAdapterIpNetwork
+from src.db.adapters.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
+from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterIpAddress
+from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterIpNetwork
+from src.db.storages.redis_db import RedisAsyncio
+from src.db.storages.redis_db import redis_client
 from src.models.query_params_models import CommonQueryParams
 from src.schemas.addresses_schemas import AgentAddressesInfo
 from src.schemas.addresses_schemas import IpV4AddressList

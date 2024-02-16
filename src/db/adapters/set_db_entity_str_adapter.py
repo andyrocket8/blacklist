@@ -5,11 +5,10 @@ from ipaddress import IPv4Network
 from uuid import UUID
 
 from src.db.adapters.base_set_db_entity_adapter import BaseSetDbEntityStrAdapter
+from src.db.base_set_db_entity import ISetDbEntity
 from src.models.ip_address_transformation import IPv4AddressStrTransformer
 from src.models.ip_network_transformation import IPv4NetworkStrTransformer
 from src.models.uuid_transformation import UUIDStrTransformer
-
-from .base_set_db_entity import ISetDbEntity
 
 
 class SetDbEntityStrAdapterUUID(BaseSetDbEntityStrAdapter[UUID, UUID], ISetDbEntity[UUID, UUID]):

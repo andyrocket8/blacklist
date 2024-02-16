@@ -7,11 +7,11 @@ from fastapi import APIRouter
 from fastapi import Depends
 from fastapi.responses import StreamingResponse
 
-from src.db.redis_db import RedisAsyncio
-from src.db.redis_db import redis_client
-from src.db.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
-from src.db.set_db_entity_str_adapter import SetDbEntityStrAdapterIpAddress
-from src.db.set_db_entity_str_adapter import SetDbEntityStrAdapterIpNetwork
+from src.db.adapters.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
+from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterIpAddress
+from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterIpNetwork
+from src.db.storages.redis_db import RedisAsyncio
+from src.db.storages.redis_db import redis_client
 from src.models.query_params_models import DownloadWhitelistQueryParams
 from src.service.addresses_db_service import AllowedAddressesSetDBService
 from src.service.networks_db_service import AllowedNetworksSetDBService

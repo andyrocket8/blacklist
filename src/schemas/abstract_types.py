@@ -6,6 +6,10 @@ from typing import TypeVar
 T = TypeVar('T')
 TypeT = Type[T]
 
+# Abstract type for hashes
+H = TypeVar('H', bound=Hashable)
+TypeH = Type[H]
+
 # Abstract type for keys
 K = TypeVar('K', bound=Hashable)
 TypeK = Type[K]
@@ -21,3 +25,4 @@ TypeInternal = Type[Internal]
 # TypeVars for Internal DB types
 KInternal = TypeVar('KInternal', bound=Hashable)
 VInternal = TypeVar('VInternal')
+HInternal = TypeVar('HInternal', bound=Hashable)

@@ -10,7 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.security import HTTPBearer
 
 from src.core.config import app_settings
-from src.db.redis_db import context_async_redis_client
+from src.db.storages.redis_db import context_async_redis_client
 from src.service.auth_check_service import AuthCheckService
 
 http_bearer_obj = HTTPBearer(auto_error=True)

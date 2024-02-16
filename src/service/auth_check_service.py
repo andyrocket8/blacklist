@@ -1,8 +1,8 @@
 from uuid import UUID
 
-from src.db.redis_db import RedisAsyncio
-from src.db.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
-from src.db.set_db_entity_str_adapter import SetDbEntityStrAdapterUUID
+from src.db.adapters.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
+from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterUUID
+from src.db.storages.redis_db import RedisAsyncio
 from src.schemas.auth_schemas import AuthCheckResult
 
 from .token_db_services import AdminTokensSetDBService

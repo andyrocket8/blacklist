@@ -8,9 +8,9 @@ from typing import Optional
 from typing import Type
 from typing import Union
 
-from src.db.redis_db import context_async_redis_client
-from src.db.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
-from src.db.set_db_entity_str_adapter import SetDbEntityStrAdapterUUID
+from src.db.adapters.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
+from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterUUID
+from src.db.storages.redis_db import context_async_redis_client
 from src.service.token_db_services import AdminTokensSetDBService
 from src.service.token_db_services import AgentTokensSetDBService
 

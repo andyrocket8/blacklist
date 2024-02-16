@@ -6,10 +6,10 @@ from fastapi import APIRouter
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials
 
-from src.db.redis_db import RedisAsyncio
-from src.db.redis_db import redis_client
-from src.db.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
-from src.db.set_db_entity_str_adapter import SetDbEntityStrAdapterIpAddress
+from src.db.adapters.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
+from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterIpAddress
+from src.db.storages.redis_db import RedisAsyncio
+from src.db.storages.redis_db import redis_client
 from src.schemas.addresses_schemas import AgentAddressesInfo
 from src.schemas.addresses_schemas import IpV4AddressList
 from src.schemas.common_response_schemas import AddResponseSchema
