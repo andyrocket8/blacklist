@@ -8,10 +8,9 @@ from typing import Generic
 from typing import Iterable
 from typing import cast
 
+from src.db.adapters.base_set_db_adapter import SetDbError
 from src.schemas.abstract_types import K
 from src.schemas.abstract_types import V
-
-from .base_set_db_adapter import SetDbError
 
 
 class SetDbIdentityError(SetDbError):

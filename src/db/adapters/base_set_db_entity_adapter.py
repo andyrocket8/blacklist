@@ -3,13 +3,12 @@ from typing import Generic
 from typing import Iterable
 from typing import Type
 
+from src.db.base_set_db_entity import ISetDbEntity
 from src.models.transformation import Transformation
 from src.schemas.abstract_types import K
 from src.schemas.abstract_types import KInternal
 from src.schemas.abstract_types import V
 from src.schemas.abstract_types import VInternal
-
-from .base_set_db_entity import ISetDbEntity
 
 
 class ISetDbEntityAdapter(ISetDbEntity[K, V], Generic[K, V, KInternal, VInternal]):

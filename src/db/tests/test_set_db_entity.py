@@ -8,9 +8,9 @@ import pytest_asyncio
 from redis.asyncio import Redis as RedisAsyncio
 
 from src.db.base_set_db_entity import ISetDbEntity
-from src.db.memory_set_storage import MemorySetStorage
 from src.db.redis_db_pool import RedisConnectionPool
 from src.db.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
+from src.db.storages.memory_set_storage import MemorySetStorage
 
 from .set_db_entity_base_tools import run_test_set_db_entity
 from .set_db_entity_base_tools import teardown_test_set_db_entity

@@ -3,11 +3,10 @@ from typing import AsyncGenerator
 from typing import Generic
 from typing import Iterable
 
+from src.db.adapters.base_set_db_adapter import ISetDbAdapter
+from src.db.base_set_db_entity import ISetDbEntity
 from src.schemas.abstract_types import K
 from src.schemas.abstract_types import V
-
-from .base_set_db_adapter import ISetDbAdapter
-from .base_set_db_entity import ISetDbEntity
 
 
 class MemorySetStorage(Generic[K, V]):
@@ -84,11 +83,11 @@ class MemorySetStorage(Generic[K, V]):
         return value in set_data
 
     def set_db_adapter(self) -> ISetDbAdapter[K]:
-        from .memory_set_db_adapter import MemorySetDbAdapter
+        from src.db.adapters.memory_set_db_adapter import MemorySetDbAdapter
 
         return MemorySetDbAdapter(self)
 
     def set_db_entity_adapter(self) -> ISetDbEntity[K, V]:
-        from .memory_set_db_entity_adapter import MemorySetDbEntityAdapter
+        from src.db.adapters.memory_set_db_entity_adapter import MemorySetDbEntityAdapter
 
         return MemorySetDbEntityAdapter[K, V](self)

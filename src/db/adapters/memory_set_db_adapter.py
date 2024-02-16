@@ -1,7 +1,7 @@
 from typing import Any
 from typing import Generic
 
-from src.db.memory_set_storage import MemorySetStorage
+from src.db.storages.memory_set_storage import MemorySetStorage
 from src.schemas.abstract_types import K
 
 from .base_set_db_adapter import ISetDbAdapter

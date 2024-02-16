@@ -4,7 +4,7 @@ from datetime import datetime as dt_datetime
 from typing import Generic
 from uuid import UUID
 
-from src.db.base_set_db_entity_adapter import BaseSetDbEntityStrAdapter
+from src.db.adapters.base_set_db_entity_adapter import BaseSetDbEntityStrAdapter
 from src.models.transformation import Transformation
 from src.models.uuid_transformation import UUIDStrTransformer
 from src.schemas.abstract_types import K

@@ -21,6 +21,7 @@ from src.utils.router_utils import get_query_params
 from .http_auth_wrapper import get_proc_auth_checker
 
 api_router = APIRouter()
+
 allowed_addresses_auth_check: Callable = get_proc_auth_checker(need_admin_permission=False)
 
 

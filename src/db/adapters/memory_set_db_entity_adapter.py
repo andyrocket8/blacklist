@@ -3,11 +3,10 @@ from typing import AsyncGenerator
 from typing import Generic
 from typing import Iterable
 
+from src.db.base_set_db_entity import ISetDbEntity
+from src.db.storages.memory_set_storage import MemorySetStorage
 from src.schemas.abstract_types import K
 from src.schemas.abstract_types import V
-
-from .base_set_db_entity import ISetDbEntity
-from .memory_set_storage import MemorySetStorage
 
 
 class MemorySetDbEntityAdapter(ISetDbEntity[K, V], Generic[K, V]):

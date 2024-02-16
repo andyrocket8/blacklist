@@ -6,7 +6,7 @@ from uuid import uuid4
 
 import pytest
 
-from src.db.memory_set_storage import MemorySetStorage
+from src.db.storages.memory_set_storage import MemorySetStorage
 
 STORAGE_DATA_ATTR = '_MemorySetStorage__data'
 

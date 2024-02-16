@@ -40,12 +40,12 @@ async def get_history(
     return result
 
 
-@api_router.get('/{address_id}', response_model=HistoryRecord)
+@api_router.get('/{ip_address}', response_model=HistoryRecord)
 async def get_history_by_address(
-    redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)], address_id: IPv4Address
+    redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)], ip_address: IPv4Address
 ):
     history_db_srv_obj = HistoryDBService(redis_client_obj)
-    history_record_obj = await history_db_srv_obj.read_record(str(address_id))
+    history_record_obj = await history_db_srv_obj.read_record(str(ip_address))
     if history_record_obj is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, f'History for address {address_id} is not found')
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f'History for address {ip_address} is not found')
     return history_record_obj

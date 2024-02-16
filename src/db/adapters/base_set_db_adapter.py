@@ -1,32 +1,19 @@
 from abc import ABC
-from abc import abstractmethod
 from typing import Generic
 
+from src.db.base_set_db import ISetDb
+from src.db.base_set_db import SetDbError
 from src.schemas.abstract_types import K
-
-
-class SetDbError(Exception):
-    pass
 
 
 class SetDbAdapterError(SetDbError):
     pass
 
 
-class ISetDbAdapter(ABC, Generic[K]):
-    """Interface for sets management"""
+class ISetDbAdapter(ISetDb[K], ABC, Generic[K]):
+    """Adapter type for Set DB"""
 
-    @abstractmethod
-    async def del_set(self, set_id: K) -> int:
-        pass
-
-    @abstractmethod
-    async def copy_set(self, source_set_id: K, target_set_id: K, with_replace: bool = False) -> int:
-        pass
-
-    @abstractmethod
-    async def exists(self, set_id: K) -> bool:
-        pass
+    pass
 
 
 class BaseSetDbAdapter(ISetDbAdapter[K], Generic[K]):

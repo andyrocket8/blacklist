@@ -4,11 +4,10 @@ from typing import Type
 from redis.asyncio import Redis as RedisAsyncio
 from redis.asyncio import RedisError
 
+from src.db.adapters.base_set_db_adapter import ISetDbAdapter
+from src.db.adapters.base_set_db_adapter import SetDbAdapterError
 from src.models.transformation import Transformation
 from src.schemas.abstract_types import K
-
-from .base_set_db_adapter import ISetDbAdapter
-from .base_set_db_adapter import SetDbAdapterError
 
 
 class RedisSetDbAdapter(ISetDbAdapter[K]):
