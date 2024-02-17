@@ -1,3 +1,4 @@
+# Methods for testing set db entities classes
 from src.db.base_set_db_entity import ISetDbEntity
 from src.schemas.abstract_types import K
 from src.schemas.abstract_types import V

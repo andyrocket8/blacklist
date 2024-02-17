@@ -7,6 +7,8 @@ from src.schemas.abstract_types import H
 from src.schemas.abstract_types import K
 from src.schemas.abstract_types import V
 
+STORAGE_DATA_ATTR = '_MemoryHashStorage__db'
+
 
 class MemoryHashStorage(Generic[H, K, V]):
     """Hash memory storage"""
@@ -43,7 +45,7 @@ class MemoryHashStorage(Generic[H, K, V]):
             if key in hash_storage:
                 affected_items += 1
                 del hash_storage[key]
-        if self.count(hash_id) == 0:
+        if await self.count(hash_id) == 0:
             self.__rm_hash_storage(hash_id)
         return affected_items
 

@@ -3,12 +3,18 @@ from dataclasses import dataclass
 from datetime import date as dt_date
 from ipaddress import IPv4Address
 from ipaddress import IPv4Network
+from typing import Generator
 from typing import Iterable
 from uuid import UUID
 from uuid import uuid4
 
 import pytest
 
+from src.db.storages.redis_db_pool import RedisConnectionPool
+
+from .test_hash_db_classes import AddressInfo
+from .test_hash_db_classes import HostInfo
+from .test_hash_db_classes import NetworkInfo
 from .test_set_db_classes import Car
 from .test_set_db_classes import SetTestData
 
@@ -109,25 +115,6 @@ def car_set_absent_test_data() -> list[Car]:
 # Fixtures for Hash DB tests
 
 
-@dataclass
-class HostInfo:
-    host_name: str
-    host_description: str
-    signature: bytes
-
-
-@dataclass
-class AddressInfo:
-    address: IPv4Address
-    host_info: HostInfo
-
-
-@dataclass
-class NetworkInfo:
-    network: IPv4Network
-    hosts: list[AddressInfo]
-
-
 def generate_signature() -> bytes:
     return random.randbytes(125)
 
@@ -190,63 +177,69 @@ def company_network_info_for_test() -> list[NetworkInfo]:
         )
     )
     # Network 2 (New York branch)
-    NetworkInfo(
-        network=IPv4Network('10.100.1.0/24'),
-        hosts=[
-            AddressInfo(
-                address=IPv4Address('10.100.1.1'),
-                host_info=HostInfo(
-                    host_name='br-01-router-01',
-                    host_description='New York Branch main router',
-                    signature=generate_signature(),
+    result.append(
+        NetworkInfo(
+            network=IPv4Network('10.100.1.0/24'),
+            hosts=[
+                AddressInfo(
+                    address=IPv4Address('10.100.1.1'),
+                    host_info=HostInfo(
+                        host_name='br-01-router-01',
+                        host_description='New York Branch main router',
+                        signature=generate_signature(),
+                    ),
                 ),
-            ),
-            AddressInfo(
-                address=IPv4Address('10.100.1.2'),
-                host_info=HostInfo(
-                    host_name='br-01-server-01',
-                    host_description='New York Branch file server',
-                    signature=generate_signature(),
+                AddressInfo(
+                    address=IPv4Address('10.100.1.2'),
+                    host_info=HostInfo(
+                        host_name='br-01-server-01',
+                        host_description='New York Branch file server',
+                        signature=generate_signature(),
+                    ),
                 ),
-            ),
-            AddressInfo(
-                address=IPv4Address('10.100.1.3'),
-                host_info=HostInfo(
-                    host_name='br-01-server-02',
-                    host_description='New York ERP system server',
-                    signature=generate_signature(),
+                AddressInfo(
+                    address=IPv4Address('10.100.1.3'),
+                    host_info=HostInfo(
+                        host_name='br-01-server-02',
+                        host_description='New York ERP system server',
+                        signature=generate_signature(),
+                    ),
                 ),
-            ),
-            # some awesome staff here
-            AddressInfo(
-                address=IPv4Address('10.100.1.10'),
-                host_info=HostInfo(
-                    host_name='br-01-printer-01',
-                    host_description='New York laser printer',
-                    signature=generate_signature(),
+                # some awesome staff here
+                AddressInfo(
+                    address=IPv4Address('10.100.1.10'),
+                    host_info=HostInfo(
+                        host_name='br-01-printer-01',
+                        host_description='New York laser printer',
+                        signature=generate_signature(),
+                    ),
                 ),
-            ),
-            AddressInfo(
-                address=IPv4Address('10.100.1.30'),
-                host_info=HostInfo(
-                    host_name='br-01-host-01', host_description='Mark Navarro computer', signature=generate_signature()
+                AddressInfo(
+                    address=IPv4Address('10.100.1.30'),
+                    host_info=HostInfo(
+                        host_name='br-01-host-01',
+                        host_description='Mark Navarro computer',
+                        signature=generate_signature(),
+                    ),
                 ),
-            ),
-            AddressInfo(
-                address=IPv4Address('10.100.1.31'),
-                host_info=HostInfo(
-                    host_name='br-01-host-02',
-                    host_description='Jane Wilson computer',
-                    signature=generate_signature(),
+                AddressInfo(
+                    address=IPv4Address('10.100.1.31'),
+                    host_info=HostInfo(
+                        host_name='br-01-host-02',
+                        host_description='Jane Wilson computer',
+                        signature=generate_signature(),
+                    ),
                 ),
-            ),
-            AddressInfo(
-                address=IPv4Address('10.100.1.32'),
-                host_info=HostInfo(
-                    host_name='br-01-host-03', host_description='Our boss playstation', signature=generate_signature()
+                AddressInfo(
+                    address=IPv4Address('10.100.1.32'),
+                    host_info=HostInfo(
+                        host_name='br-01-host-03',
+                        host_description='Our boss playstation',
+                        signature=generate_signature(),
+                    ),
                 ),
-            ),
-        ],
+            ],
+        )
     )
     # Network 3 (Arizona Branch)
     result.append(
@@ -277,7 +270,7 @@ def company_network_info_for_test() -> list[NetworkInfo]:
                         signature=generate_signature(),
                     ),
                 ),
-                # Network addresses mess from our devops!
+                # Network addresses. Some mess from our devops!
                 AddressInfo(
                     address=IPv4Address('10.100.2.50'),
                     host_info=HostInfo(
@@ -322,3 +315,12 @@ def company_network_info_for_test() -> list[NetworkInfo]:
         )
     )
     return result
+
+
+@pytest.fixture(scope='module')
+def redis_connection_pool(redis_env_for_test) -> Generator[RedisConnectionPool, None, None]:
+    """Yield connection pool if redis test env is up"""
+    if not redis_env_for_test.test_redis_available:
+        pytest.skip('No redis configuration file detected!')
+    print(f'Redis config now: {redis_env_for_test}')
+    yield RedisConnectionPool(redis_env_for_test.redis_config)

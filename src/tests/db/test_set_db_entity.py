@@ -10,7 +10,6 @@ from redis.asyncio import Redis as RedisAsyncio
 from src.db.adapters.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
 from src.db.base_set_db_entity import ISetDbEntity
 from src.db.storages.memory_set_storage import MemorySetStorage
-from src.db.storages.redis_db_pool import RedisConnectionPool
 
 from .set_db_entity_base_tools import run_test_set_db_entity
 from .set_db_entity_base_tools import teardown_test_set_db_entity
@@ -18,15 +17,6 @@ from .test_memory_set_storage import STORAGE_DATA_ATTR
 from .test_set_db_classes import Car
 from .test_set_db_classes import SetDbEntityStrCarAdapter
 from .test_set_db_classes import SetTestData
-
-
-@pytest.fixture
-def redis_connection_pool(redis_env_for_test) -> Generator[RedisConnectionPool, None, None]:
-    """Yield connection pool if redis test env is up"""
-    if not redis_env_for_test.test_redis_available:
-        pytest.skip('No redis configuration file detected!')
-    print(f'Redis config now: {redis_env_for_test}')
-    yield RedisConnectionPool(redis_env_for_test.redis_config)
 
 
 @pytest.fixture
