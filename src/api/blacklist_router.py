@@ -9,11 +9,10 @@ from fastapi import APIRouter
 from fastapi import Depends
 from fastapi.responses import StreamingResponse
 
+from src.api.di.banned_addresses_routines import get_banned_addresses
 from src.db.storages.redis_db import RedisAsyncio
 from src.db.storages.redis_db import redis_client
 from src.models.query_params_models import DownloadBlackListQueryParams
-
-from .banned_addresses_router import get_banned_addresses
 
 api_router = APIRouter()
 
