@@ -1,5 +1,4 @@
 # common class for processing addresses handles
-from dataclasses import asdict
 from typing import Annotated
 from typing import Optional
 
@@ -8,16 +7,15 @@ from fastapi import BackgroundTasks
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials
 
-from src.api.di.banned_addresses_routines import get_banned_addresses
+from src.api.di.db_di_routines import address_db_service_adapter
 from src.api.http_auth_wrapper import get_proc_auth_checker
 from src.core.settings import ACTIVE_USAGE_INFO
+from src.core.settings import ALLOWED_ADDRESSES_CATEGORY_NAME
 from src.core.settings import BACKGROUND_ADD_RECORDS
 from src.core.settings import BACKGROUND_DELETE_RECORDS
+from src.core.settings import BANNED_ADDRESSES_CATEGORY_NAME
 from src.core.settings import HISTORY_USAGE_INFO
-from src.db.adapters.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
-from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterIpAddress
-from src.db.storages.redis_db import RedisAsyncio
-from src.db.storages.redis_db import redis_client
+from src.db.base_set_db_entity import ISetDbEntity
 from src.models.query_params_models import CommonQueryParams
 from src.schemas.addresses_schemas import AgentAddressesInfo
 from src.schemas.addresses_schemas import IpV4AddressList
@@ -25,7 +23,7 @@ from src.schemas.common_response_schemas import AddResponseSchema
 from src.schemas.common_response_schemas import CountResponseSchema
 from src.schemas.common_response_schemas import DeleteResponseSchema
 from src.schemas.usage_schemas import ActionType
-from src.service.addresses_db_service import BlackListAddressesSetDBService
+from src.service.service_db_factories import addresses_db_service_factory
 from src.tasks.celery_tasks import celery_update_history_task
 from src.tasks.celery_tasks import celery_update_usage_info_task
 from src.tasks.history_update_bg_task import update_history_bg_task_ns
@@ -37,29 +35,32 @@ addresses_auth_check = get_proc_auth_checker(need_admin_permission=False)
 
 class AddressHandler:
     def __init__(self, address_category: str, address_category_description: str):
+        assert address_category in (
+            BANNED_ADDRESSES_CATEGORY_NAME,
+            ALLOWED_ADDRESSES_CATEGORY_NAME,
+        ), 'Wrong address category name supplied'
         self.__address_category = address_category  # category of address (used in history)
         self.__address_category_description = address_category_description  # used in handler annotations
         self.__router = APIRouter()
 
     async def addresses_list(
         self,
-        redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
+        db_service_adapter: Annotated[ISetDbEntity, Depends(address_db_service_adapter)],
         query_params: Annotated[CommonQueryParams, Depends()],
     ):
-        # TODO change to universal method
-        return await get_banned_addresses(redis_client_obj, asdict(query_params))
+        service_obj = addresses_db_service_factory(self.__address_category, db_service_adapter)
+        return await service_obj.get_records(
+            records_count=query_params.records_count, all_records=query_params.all_records
+        )
 
     async def save_addresses(
         self,
         agent_info: AgentAddressesInfo,
-        redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
+        db_service_adapter: Annotated[ISetDbEntity, Depends(address_db_service_adapter)],
         background_tasks: BackgroundTasks,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(addresses_auth_check),  # noqa: B008
     ):
-        # TODO Adopt to universal service
-        service_obj = BlackListAddressesSetDBService(
-            SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(redis_client_obj))
-        )
+        service_obj = addresses_db_service_factory(self.__address_category, db_service_adapter)
         added_count = await service_obj.write_records(agent_info.addresses)
         if len(agent_info.addresses) <= BACKGROUND_ADD_RECORDS:
             # run fast tasks in background
@@ -67,7 +68,12 @@ class AddressHandler:
             background_tasks.add_task(update_usage_bg_task_ns, ACTIVE_USAGE_INFO, agent_info)
             # Update history information
             background_tasks.add_task(
-                update_history_bg_task_ns, ACTIVE_USAGE_INFO, HISTORY_USAGE_INFO, agent_info, ActionType.add_action
+                update_history_bg_task_ns,
+                ACTIVE_USAGE_INFO,
+                HISTORY_USAGE_INFO,
+                agent_info,
+                ActionType.add_action,
+                self.__address_category,
             )
         else:
             # invoke celery task for update usage and history
@@ -77,6 +83,7 @@ class AddressHandler:
                 (
                     agent_info_dict,
                     ActionType.add_action,
+                    self.__address_category,
                 )
             )
 
@@ -85,32 +92,35 @@ class AddressHandler:
     async def delete_addresses(
         self,
         agent_info: AgentAddressesInfo,
-        redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
+        db_service_adapter: Annotated[ISetDbEntity, Depends(address_db_service_adapter)],
         background_tasks: BackgroundTasks,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(addresses_auth_check),  # noqa: B008
     ):
-        service_obj = BlackListAddressesSetDBService(
-            SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(redis_client_obj))
-        )
+        service_obj = addresses_db_service_factory(self.__address_category, db_service_adapter)
         deleted_count = await service_obj.del_records(agent_info.addresses)
         if len(agent_info.addresses) <= BACKGROUND_DELETE_RECORDS:
+            # TODO Adopt background services
             background_tasks.add_task(
-                update_history_bg_task_ns, ACTIVE_USAGE_INFO, HISTORY_USAGE_INFO, agent_info, ActionType.remove_action
+                update_history_bg_task_ns,
+                ACTIVE_USAGE_INFO,
+                HISTORY_USAGE_INFO,
+                agent_info,
+                ActionType.remove_action,
+                self.__address_category,
             )
         else:
             # invoke celery task for update usage
+            # TODO Adopt celery tasks
             agent_info_dict = agent_info.encode()
-            celery_update_history_task.apply_async(agent_info_dict, ActionType.remove_action)
+            celery_update_history_task.apply_async(agent_info_dict, ActionType.remove_action, self.__address_category)
 
         return DeleteResponseSchema(deleted=deleted_count)
 
     async def count_banned_addresses(
         self,
-        redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
+        db_service_adapter: Annotated[ISetDbEntity, Depends(address_db_service_adapter)],
     ):
-        service_obj = BlackListAddressesSetDBService(
-            SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(redis_client_obj))
-        )
+        service_obj = addresses_db_service_factory(self.__address_category, db_service_adapter)
         count = await service_obj.count()
         return CountResponseSchema(count=count)
 

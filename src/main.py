@@ -5,10 +5,10 @@ import uvicorn  # type: ignore[import-untyped]
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
+from src.api.address_routers import allowed_addresses_router as allowed_ip_router
 from src.api.address_routers import banned_addresses_router as banned_ip_router
 from src.api.addresses_groups_router import allowed_addresses_api_router as allowed_ip_groups_router
 from src.api.addresses_groups_router import banned_addresses_api_router as banned_ip_groups_router
-from src.api.allowed_addresses_router import api_router as allowed_ip_router
 from src.api.allowed_networks_router import api_router as allowed_network_router
 from src.api.blacklist_router import api_router as blacklist_router
 from src.api.history_router import api_router as history_router

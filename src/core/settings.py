@@ -43,9 +43,16 @@ HISTORY_TIMEDELTA_MASK = r'^([0-9]+)([smhd]{1})$'
 # Redis container name with tag
 REDIS_DOCKER_IMAGE_NAME = 'redis:7.2.3-alpine3.18'
 
+# Addresses constants
+ALLOWED_ADDRESSES_CATEGORY_NAME = 'allowed addresses'
+BANNED_ADDRESSES_CATEGORY_NAME = 'banned addresses'
 
-# DEFAULT GROUP CONSTS
+# Default group consts
 DEFAULT_GROUP_NAME = 'default'
 DEFAULT_GROUP_DESCRIPTION = 'Default group'
 ALLOWED_ADDRESSES_GROUP_NAME = 'allowed addresses'
 BANNED_ADDRESSES_GROUP_NAME = 'banned addresses'
+
+
+# Usage options
+HISTORY_PURGE_ON_LAST_DELETE_OPERATION = False  # Whether delete record in usage history on last delete operation

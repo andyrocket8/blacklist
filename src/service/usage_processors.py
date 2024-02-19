@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 
 from src.core.config import app_settings
+from src.core.settings import HISTORY_PURGE_ON_LAST_DELETE_OPERATION
 from src.schemas.addresses_schemas import AgentAddressesInfo
 from src.schemas.usage_schemas import ActionType
 from src.schemas.usage_schemas import AddressHistoryRecord
@@ -59,7 +60,9 @@ class HistoryProcessor:
         self.usage_db_service = usage_db_service
         self.history_db_service = history_db_service
 
-    async def update_history(self, agent_action_info: AgentAddressesInfo, action_type: ActionType) -> int:
+    async def update_history(
+        self, agent_action_info: AgentAddressesInfo, action_type: ActionType, address_category: str
+    ) -> int:
         updated_records = 0
         logging.debug(
             'Update history statistics for %s agent, records count: %d, action type: %s',
@@ -72,7 +75,10 @@ class HistoryProcessor:
             history_record_obj: Optional[AddressHistoryRecord] = await self.history_db_service.read_record(address_str)
             action_time = agent_action_info.action_time
             history_record_info_obj = HistoryRecordInfo(
-                source=agent_action_info.source_agent, action_time=action_time, action_type=action_type
+                source=agent_action_info.source_agent,
+                action_time=action_time,
+                action_type=action_type,
+                address_category=address_category,
             )
             if history_record_obj is None:
                 logging.debug('Create history statistics for address %s', address)
@@ -101,14 +107,16 @@ class HistoryProcessor:
                     history_record_obj.history_records = []
             # commit changes to history db
             updated_records += await self.history_db_service.write_record(address_str, history_record_obj)
-            # delete usage record if last operation was deletion
-            actions_len = len(history_record_obj.history_records)
-            last_action_type = history_record_obj.history_records[actions_len - 1].action_type
-            if last_action_type == ActionType.remove_action:
-                logging.debug(
-                    'Delete usage info for address %s, agent %s',
-                    address,
-                    agent_action_info.source_agent,
-                )
-                await self.usage_db_service.delete_record(address_str)
+            # delete usage record if last operation was deletion.
+            # With mixed history for whitelist and blacklist and set groups the further would not work properly!
+            if HISTORY_PURGE_ON_LAST_DELETE_OPERATION:
+                actions_len = len(history_record_obj.history_records)
+                last_action_type = history_record_obj.history_records[actions_len - 1].action_type
+                if last_action_type == ActionType.remove_action:
+                    logging.debug(
+                        'Delete usage info for address %s, agent %s',
+                        address,
+                        agent_action_info.source_agent,
+                    )
+                    await self.usage_db_service.delete_record(address_str)
         return updated_records

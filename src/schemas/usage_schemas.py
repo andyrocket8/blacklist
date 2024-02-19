@@ -28,7 +28,7 @@ class HistoryRecordInfo(BaseModel):
     source: str
     action_time: Annotated[datetime.datetime, Field(default_factory=now_cur_tz)]
     action_type: ActionType
-    category: Optional[str] = None  # address list category (if not set then it is blacklist)
+    address_category: Optional[str] = None  # address list category (if not set then it is blacklist)
     address_group: Optional[str] = None  # address list group (if not set then it is default group)
 
 
