@@ -42,6 +42,15 @@ async def check_set_consistency(
         ), f'Expect absense of record {absent_record} in storage data'
 
 
+async def add_records_to_sets(
+    set_db_entity_obj: ISetDbEntity[K, V], set_db_entity_test_data: list[SetTestData[K, V]]
+) -> list[int]:
+    result: list[int] = list()
+    for test_record in set_db_entity_test_data:
+        result.append(await set_db_entity_obj.add_to_set(test_record.set_id, test_record.set_data))
+    return result
+
+
 async def run_test_set_db_entity(
     set_db_entity_test_data: list[SetTestData[K, V]],
     set_db_entity_absent_data: list[V],
@@ -60,9 +69,11 @@ async def run_test_set_db_entity(
     assert len(set_db_entity_test_data) > 2, 'Test data length should be greater than 2'
     assert len(set_db_entity_absent_data) > 2, 'Test data ob absent records should be greater than 2'
     # Add data of all test sets to ISetDbEntity
-    for step, test_record in enumerate(set_db_entity_test_data):
-        records_added = await set_db_entity_obj.add_to_set(test_record.set_id, test_record.set_data)
-        assert records_added == len(test_record.set_data), f'Expect to write all set data to set (Step {step})'
+    records_added_list = await add_records_to_sets(set_db_entity_obj, set_db_entity_test_data)
+    for step, step_add_result in enumerate(records_added_list):
+        assert step_add_result == len(
+            set_db_entity_test_data[step].set_data
+        ), f'Expect to write all set data to set (Step {step})'
     for test_record in set_db_entity_test_data:
         # check sets consistency
         await check_set_consistency(set_db_entity_obj, test_record, set_db_entity_absent_data)

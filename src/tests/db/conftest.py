@@ -71,6 +71,7 @@ def ip_addresses_data_three() -> FixtureSet:
 
 @pytest.fixture
 def car_set_test_data() -> list[SetTestData[UUID, Car]]:
+    # All data in this set is faked
     return [
         SetTestData(
             uuid4(),
@@ -103,6 +104,7 @@ def car_set_test_data() -> list[SetTestData[UUID, Car]]:
 
 @pytest.fixture
 def car_set_absent_test_data() -> list[Car]:
+    # All data in this set is faked
     return [
         Car('Honda', 'Pilot', 'Dark grey', dt_date(2013, 8, 15), 'X003XX99'),
         Car('Renault', 'Duster', 'White', dt_date(2021, 2, 1), 'B785AX77'),
@@ -123,7 +125,7 @@ def generate_signature() -> bytes:
 @pytest.fixture
 def company_network_info_for_test() -> list[NetworkInfo]:
     result: list[NetworkInfo] = list()
-
+    # All data in this set is faked
     # Network 1 (Head office somewhere in Texas)
     result.append(
         NetworkInfo(

@@ -21,7 +21,10 @@ class DownloadBlackListQueryParams(CommonQueryParams):
 class DownloadWhitelistQueryParams:
     records_count: int = Query(10, description='Number of records to return. Omitted if all_records == true')
     all_records: bool = Query(False, description='Return all records')
-    with_networks: bool = Query(True, description='Add allowed networks in donwload set')
+    with_networks: bool = Query(True, description='Add allowed networks in download set')
+    groups: Optional[str] = Query(
+        None, description='Groups to download, list separated by comma. If not specified then download all groups'
+    )
     filename: str = Query('', description='Set filename to download as file', example='text.txt')
 
 

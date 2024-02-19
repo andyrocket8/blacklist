@@ -13,6 +13,8 @@ from src.db.base_set_db_entity import SetDbIdentityError
 
 
 class RedisSetDbEntityAdapter(ISetDbEntity[str, str]):
+    """Entity Set management adapter for Redis with keys as str, values as str"""
+
     def __init__(self, db: RedisAsyncio):
         self.__db = db
 
