@@ -1,10 +1,12 @@
 from asyncio import sleep as asleep
 from typing import AsyncGenerator
+from typing import Callable
 from typing import Generic
 from typing import Iterable
 
 from src.db.adapters.base_set_db_adapter import ISetDbAdapter
 from src.db.base_set_db_entity import ISetDbEntity
+from src.db.base_union_set_db import IUnionSetDb
 from src.schemas.abstract_types import K
 from src.schemas.abstract_types import V
 
@@ -82,6 +84,13 @@ class MemorySetStorage(Generic[K, V]):
         set_data = self.get_set(set_id)
         return value in set_data
 
+    def union_sets(self, new_set_id: K, set_identities: Iterable[K]):
+        set_data = self.get_set(new_set_id)
+        for merged_set_id in set_identities:
+            if self.exists(merged_set_id):
+                merged_set_data = self.get_set(merged_set_id)
+                set_data |= merged_set_data
+
     def set_db_adapter(self) -> ISetDbAdapter[K]:
         from src.db.adapters.memory_set_db_adapter import MemorySetDbAdapter
 
@@ -91,3 +100,9 @@ class MemorySetStorage(Generic[K, V]):
         from src.db.adapters.memory_set_db_entity_adapter import MemorySetDbEntityAdapter
 
         return MemorySetDbEntityAdapter[K, V](self)
+
+    def union_set_db_adapter(self, key_generator: Callable[[], K]) -> IUnionSetDb[K]:
+        """Need key generator here for proper union of set"""
+        from src.db.adapters.memory_union_set_db_adapter import MemoryUnionSetDbAdapter
+
+        return MemoryUnionSetDbAdapter[K](self, key_generator)

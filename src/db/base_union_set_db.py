@@ -7,9 +7,7 @@ from src.schemas.abstract_types import K
 
 
 class IUnionSetDb(ABC, Generic[K]):
-    """Interface for work with united sets
-    Extends ISetDb to perform also basic operations with sets
-    """
+    """Interface for work with united sets. Only perform operations for joining sets"""
 
     @abstractmethod
     async def union_set(self, set_identities: Iterable[K]) -> K:
@@ -17,12 +15,12 @@ class IUnionSetDb(ABC, Generic[K]):
         pass
 
 
-class BaseUnionSetDb(IUnionSetDb[K]):
-    """Base Union Set for interaction with DB Adapters"""
+class BaseUnionSetDb(IUnionSetDb[K], Generic[K]):
+    """Wrapper for dependency injection"""
 
-    def __init__(self, set_db_adapter: IUnionSetDb[K]):
-        self.__set_db_adapter: IUnionSetDb[K] = set_db_adapter
+    def __init__(self, union_set_db_a: IUnionSetDb[K]):
+        self.union_set_db_a: IUnionSetDb[K] = union_set_db_a
 
     async def union_set(self, set_identities: Iterable[K]) -> K:
         """Union sets and return new set identity"""
-        return await self.__set_db_adapter.union_set(set_identities)
+        return await self.union_set_db_a.union_set(set_identities)
