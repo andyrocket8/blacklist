@@ -168,3 +168,15 @@ class GroupsDbService:
         if group_data is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Wrong group id specified in request')
         return await self.__groups_data_db_srv.delete_group(group_id)
+
+    def default_group_id(self):
+        """Get default group ID for service"""
+        return self.__default_group_id
+
+    async def get_group_by_name(self, group_name: str) -> Optional[GroupSet]:
+        """Find group data by group name"""
+        groups = await self.list_groups()
+        for group in groups:
+            if group.group_name == group_name:
+                return group
+        return None
