@@ -1,3 +1,6 @@
+from dataclasses import dataclass
+from uuid import UUID
+
 from src.core.settings import ALLOWED_ADDRESSES_CATEGORY_NAME
 from src.core.settings import ALLOWED_ADDRESSES_GROUP_NAME
 from src.core.settings import ALLOWED_ADDRESSES_GROUPS_HASH_ID
@@ -10,6 +13,7 @@ from src.db.base_hash_db_entity import IHashDbEntity
 from src.db.base_set_db_entity import ISetDbEntity
 from src.service.abstract_set_db_service import AbstractSetDBService
 from src.service.addresses_db_service import AllowedAddressesSetDBService
+from src.service.addresses_db_service import AnyAddressesSetDBService
 from src.service.addresses_db_service import BlackListAddressesSetDBService
 from src.service.groups_db_service import GroupsDbService
 
@@ -47,5 +51,41 @@ def addresses_db_service_factory(address_category_name: str, db_service_adapter:
         return AllowedAddressesSetDBService(db_service_adapter)
     elif address_category_name == BANNED_ADDRESSES_CATEGORY_NAME:
         return BlackListAddressesSetDBService(db_service_adapter)
+    else:
+        raise ValueError('Incorrect value of address category name passed to addresses_db_service_factory')
+
+
+def any_addresses_db_service_factory(set_id: UUID, db_service_adapter: ISetDbEntity) -> AbstractSetDBService:
+    return AnyAddressesSetDBService(db_service_adapter, set_id=set_id)
+
+
+@dataclass
+class ServiceWithGroupDbAdapters:
+    db_service_adapter: ISetDbEntity
+    db_hash_service_adapter: IHashDbEntity
+
+
+@dataclass
+class ServiceWithGroups:
+    addresses_db_service: AbstractSetDBService
+    groups_db_service: GroupsDbService
+
+
+def addresses_with_groups_db_service_factory(
+    address_category_name: str, adapters: ServiceWithGroupDbAdapters
+) -> ServiceWithGroups:
+    groups_db_service: GroupsDbService = groups_db_service_factory(
+        address_category_name, adapters.db_hash_service_adapter
+    )
+    if address_category_name == ALLOWED_ADDRESSES_CATEGORY_NAME:
+        return ServiceWithGroups(
+            addresses_db_service=AllowedAddressesSetDBService(adapters.db_service_adapter),
+            groups_db_service=groups_db_service,
+        )
+    elif address_category_name == BANNED_ADDRESSES_CATEGORY_NAME:
+        return ServiceWithGroups(
+            addresses_db_service=BlackListAddressesSetDBService(adapters.db_service_adapter),
+            groups_db_service=groups_db_service,
+        )
     else:
         raise ValueError('Incorrect value of address category name passed to addresses_db_service_factory')

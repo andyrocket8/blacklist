@@ -8,6 +8,7 @@ from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterIpAdd
 from src.db.base_hash_db_entity import IHashDbEntity
 from src.db.base_set_db_entity import ISetDbEntity
 from src.db.storages.redis_db import redis_client
+from src.service.service_db_factories import ServiceWithGroupDbAdapters
 
 
 async def groups_db_service_adapter() -> AsyncGenerator[IHashDbEntity, None]:
@@ -23,3 +24,11 @@ async def address_db_service_adapter() -> AsyncGenerator[ISetDbEntity, None]:
     """
     async for client_obj in redis_client():
         yield SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(client_obj))
+
+
+async def address_with_groups_db_service_adapter() -> AsyncGenerator[ServiceWithGroupDbAdapters, None]:
+    async for client_obj in redis_client():
+        yield ServiceWithGroupDbAdapters(
+            db_service_adapter=SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(client_obj)),
+            db_hash_service_adapter=HashDbEntityGroupDataStrAdapter(RedisDBEntityAdapter(client_obj)),
+        )

@@ -3,6 +3,7 @@
 import datetime
 from ipaddress import IPv4Address
 from json import JSONEncoder
+from typing import Optional
 
 from .base_input_schema import BaseInputSchema
 
@@ -41,3 +42,9 @@ class AgentAddressesInfo(BaseInputSchema):
 
     def encode(self):
         return self.model_dump(mode='json')
+
+
+class AgentAddressesInfoWithGroup(AgentAddressesInfo):
+    """Adopted information with addresses group included. If not specified - it is treated as default"""
+
+    address_group: Optional[str] = None

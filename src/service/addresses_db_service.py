@@ -16,3 +16,9 @@ class AllowedAddressesSetDBService(AbstractSetDBService[IPv4Address]):
     """Serve operations with allowed addresses in Redis database"""
 
     class_set_id = ALLOWED_ADDRESSES_SET_ID
+
+
+class AnyAddressesSetDBService(AbstractSetDBService[IPv4Address]):
+    """Define set ID in the __init__ function!"""
+
+    pass

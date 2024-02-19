@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from fastapi import Query
 
@@ -7,6 +8,7 @@ from fastapi import Query
 class CommonQueryParams:
     records_count: int = Query(10, description='Number of records to return. Omitted if all_records == true')
     all_records: bool = Query(False, description='Return all records')
+    address_group: Optional[str] = Query(None, description='Group of address, if not specified - default group')
 
 
 @dataclass
@@ -39,3 +41,8 @@ class HistoryQueryParams:
         example='60m',
     )
     all_records: bool = Query(False, description='Return all records, omit "time_offset" parameter')
+
+
+@dataclass
+class CountAddress:
+    address_group: Optional[str] = Query(None, description='Group of address, if not specified - default group')
