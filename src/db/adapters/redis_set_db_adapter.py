@@ -37,3 +37,6 @@ class RedisSetDbAdapter(ISetDbAdapter[str]):
 
     async def exists(self, set_id: str) -> bool:
         return await self.__db.exists(set_id) == 1
+
+    async def set_ttl(self, set_id: str, timeout: int):
+        await self.__db.expire(set_id, timeout)

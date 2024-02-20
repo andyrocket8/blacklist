@@ -39,3 +39,6 @@ class BaseSetDbAdapter(ISetDbAdapter[K], Generic[K, KInternal]):
 
     async def exists(self, set_id: K) -> bool:
         return await self.__storage.exists(self.key_transform.transform_to_storage(set_id))
+
+    async def set_ttl(self, set_id: K, timeout: int):
+        await self.__storage.set_ttl(self.key_transform.transform_to_storage(set_id), timeout)

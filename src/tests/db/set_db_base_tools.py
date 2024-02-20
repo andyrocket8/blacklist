@@ -1,4 +1,6 @@
 # utilities for testing set db classes and adapters
+import logging
+from asyncio import sleep as a_sleep
 from typing import Callable
 
 from src.db.base_set_db import ISetDb
@@ -62,6 +64,12 @@ async def run_test_set_db(
     # checking consistency
     copied_set_data = SetTestData(copied_set_id, set_db_entity_test_data[0].set_data)
     await check_set_consistency(set_db_entity_obj, copied_set_data, list())
+    # checking set ttl
+    await set_db_obj.set_ttl(copied_set_id, 2)
+    logging.debug('Sleeping for 3 seconds to test TTL setting')
+    await a_sleep(3)
+    logging.debug('Continue db set test execution')
+    assert not await set_db_obj.exists(copied_set_id), 'Copied set must be delete with TTL setting'
 
 
 async def teardown_test_set_db(

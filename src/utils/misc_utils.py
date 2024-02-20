@@ -10,3 +10,8 @@ def crop_list_tail(list_to_filter: list[Any], filter_depth: Optional[int] = None
         if filter_depth is not None
         else list_to_filter
     )
+
+
+def split_str_list(values_comma_separated: str) -> list[str]:
+    """parse list of values separated with commas"""
+    return [x for x in map(lambda y: y.strip(), values_comma_separated.split(',')) if len(x) > 0]

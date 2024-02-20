@@ -15,7 +15,7 @@ from src.schemas.common_response_schemas import CountResponseSchema
 from src.schemas.common_response_schemas import DeleteResponseSchema
 from src.schemas.network_schemas import AgentNetworkInfo
 from src.schemas.network_schemas import IPv4NetworkList
-from src.service.networks_db_service import AllowedNetworksSetDBService
+from src.service.networks_db_service import AllowedNetworksSetDBEntityService
 from src.utils.router_utils import get_query_params
 
 from .http_auth_wrapper import get_proc_auth_checker
@@ -33,8 +33,10 @@ async def get_allowed_networks(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     query_params: Annotated[dict, Depends(get_query_params)],
 ):
-    service_obj = AllowedNetworksSetDBService(SetDbEntityStrAdapterIpNetwork(RedisSetDbEntityAdapter(redis_client_obj)))
-    return await service_obj.get_records(**query_params)
+    service_obj = AllowedNetworksSetDBEntityService(
+        SetDbEntityStrAdapterIpNetwork(RedisSetDbEntityAdapter(redis_client_obj))
+    )
+    return [x async for x in service_obj.fetch_records(**query_params)]
 
 
 @api_router.post('/add', summary='Add allowed networks to storage', response_model=AddResponseSchema)
@@ -43,7 +45,9 @@ async def save_allowed_networks(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     auth: Optional[HTTPAuthorizationCredentials] = Depends(allowed_networks_auth_check),  # noqa: B008
 ):
-    service_obj = AllowedNetworksSetDBService(SetDbEntityStrAdapterIpNetwork(RedisSetDbEntityAdapter(redis_client_obj)))
+    service_obj = AllowedNetworksSetDBEntityService(
+        SetDbEntityStrAdapterIpNetwork(RedisSetDbEntityAdapter(redis_client_obj))
+    )
     added_count = await service_obj.write_records(agent_info.networks)
     return AddResponseSchema(added=added_count)
 
@@ -54,7 +58,9 @@ async def delete_allowed_networks(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
     auth: Optional[HTTPAuthorizationCredentials] = Depends(allowed_networks_auth_check),  # noqa: B008
 ):
-    service_obj = AllowedNetworksSetDBService(SetDbEntityStrAdapterIpNetwork(RedisSetDbEntityAdapter(redis_client_obj)))
+    service_obj = AllowedNetworksSetDBEntityService(
+        SetDbEntityStrAdapterIpNetwork(RedisSetDbEntityAdapter(redis_client_obj))
+    )
     deleted_count = await service_obj.del_records(agent_info.networks)
     return DeleteResponseSchema(deleted=deleted_count)
 
@@ -63,6 +69,8 @@ async def delete_allowed_networks(
 async def count_allowed_networks(
     redis_client_obj: Annotated[RedisAsyncio, Depends(redis_client)],
 ):
-    service_obj = AllowedNetworksSetDBService(SetDbEntityStrAdapterIpNetwork(RedisSetDbEntityAdapter(redis_client_obj)))
+    service_obj = AllowedNetworksSetDBEntityService(
+        SetDbEntityStrAdapterIpNetwork(RedisSetDbEntityAdapter(redis_client_obj))
+    )
     count = await service_obj.count()
     return CountResponseSchema(count=count)

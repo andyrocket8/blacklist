@@ -7,9 +7,9 @@ from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterIpAdd
 from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterIpNetwork
 from src.db.storages.redis_db import RedisAsyncio
 from src.schemas.addresses_schemas import IpV4AddressList
-from src.service.addresses_db_service import AllowedAddressesSetDBService
-from src.service.addresses_db_service import BlackListAddressesSetDBService
-from src.service.networks_db_service import AllowedNetworksSetDBService
+from src.service.addresses_db_service import AllowedAddressesSetDBEntityService
+from src.service.addresses_db_service import BlackListAddressesSetDBEntityService
+from src.service.networks_db_service import AllowedNetworksSetDBEntityService
 from src.service.process_banned_ips import without_allowed_ips
 
 
@@ -18,7 +18,7 @@ async def get_banned_addresses(redis_client_obj: RedisAsyncio, query_params: dic
     start_moment = dt_datetime.now()
     try:
         logging.debug('Starting blacklist query execution')
-        service_obj = BlackListAddressesSetDBService(
+        service_obj = BlackListAddressesSetDBEntityService(
             SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(redis_client_obj))
         )
         filter_records = query_params.pop('filter_records')
@@ -28,11 +28,11 @@ async def get_banned_addresses(redis_client_obj: RedisAsyncio, query_params: dic
         banned_records = await service_obj.get_records(**query_params)
         if filter_records:
             # filter by allowed IPs
-            allowed_service_obj = AllowedAddressesSetDBService(
+            allowed_service_obj = AllowedAddressesSetDBEntityService(
                 SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(redis_client_obj))
             )
             allowed_records = await allowed_service_obj.get_records(all_records=True)
-            allowed_net_service_obj = AllowedNetworksSetDBService(
+            allowed_net_service_obj = AllowedNetworksSetDBEntityService(
                 SetDbEntityStrAdapterIpNetwork(RedisSetDbEntityAdapter(redis_client_obj))
             )
             allowed_networks = await allowed_net_service_obj.get_records(all_records=True)

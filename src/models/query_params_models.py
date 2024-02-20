@@ -12,20 +12,54 @@ class CommonQueryParams:
 
 
 @dataclass
-class DownloadBlackListQueryParams(CommonQueryParams):
-    filter_records: bool = Query(True, description='Filter records with allowed addresses and networks')
+class DownloadListQueryParams:
+    records_count: int = Query(10, description='Number of records to return. Omitted if all_records == true')
+    all_records: bool = Query(True, description='Return all records')
     filename: str = Query('', description='Set filename to download as file', example='text.txt')
 
 
 @dataclass
-class DownloadWhitelistQueryParams:
-    records_count: int = Query(10, description='Number of records to return. Omitted if all_records == true')
-    all_records: bool = Query(False, description='Return all records')
-    with_networks: bool = Query(True, description='Add allowed networks in download set')
+class DownloadBlackListQueryParams(DownloadListQueryParams):
+    filter_records: bool = Query(True, description='Filter records with allowed addresses and networks')
+    banned_address_groups: str = Query(
+        '',
+        description='Select only specified banned address records. If not set merge data from all banned sets',
+        openapi_examples={
+            'All banned groups': {'summary': 'Retrieve all addresses from all banned address groups', 'value': ''},
+            'Only default group': {
+                'summary': 'Retrieve addresses only from default banned address group',
+                'value': 'default',
+            },
+            'Some distinct groups': {
+                'summary': 'Retrieve only distinct banned address groups (enumerate group names separated by comma)',
+                'value': 'group_1,group_2',
+            },
+        },
+    )
+    allowed_address_groups: str = Query(
+        '',
+        description='Filter only with specified allowed address groups. If not set merge data from all allowed sets',
+        openapi_examples={
+            'All allowed groups': {'summary': 'Retrieve all addresses from all allowed address groups', 'value': ''},
+            'Only default group': {
+                'summary': 'Retrieve addresses only from default allowed address group',
+                'value': 'default',
+            },
+            'Some distinct groups': {
+                'summary': 'Retrieve only distinct allowed address groups (enumerate group names separated by comma)',
+                'value': 'group_1,group_2',
+            },
+        },
+    )
+
+
+@dataclass
+class DownloadWhitelistQueryParams(DownloadListQueryParams):
+    with_networks: bool = Query(False, description='Add allowed networks in download set')
+    # TODO rename to make similar as in DownloadBlackListQueryParams
     groups: Optional[str] = Query(
         None, description='Groups to download, list separated by comma. If not specified then download all groups'
     )
-    filename: str = Query('', description='Set filename to download as file', example='text.txt')
 
 
 @dataclass

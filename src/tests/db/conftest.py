@@ -1,3 +1,4 @@
+import logging
 import random
 from dataclasses import dataclass
 from datetime import date as dt_date
@@ -17,6 +18,9 @@ from .test_hash_db_classes import HostInfo
 from .test_hash_db_classes import NetworkInfo
 from .test_set_db_classes import Car
 from .test_set_db_classes import SetTestData
+
+# Initialize logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s [%(name)s] %(message)s')
 
 
 @dataclass

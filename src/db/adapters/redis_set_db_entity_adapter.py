@@ -8,6 +8,7 @@ from typing import cast
 from redis.asyncio import Redis as RedisAsyncio
 from redis.asyncio import RedisError
 
+from src.core.settings import BATCH_SIZE
 from src.db.base_set_db_entity import ISetDbEntity
 from src.db.base_set_db_entity import SetDbIdentityError
 
@@ -39,7 +40,24 @@ class RedisSetDbEntityAdapter(ISetDbEntity[str, str]):
             raise SetDbIdentityError('Redis DB Error, details: {}'.format(str(e))) from None
 
     async def fetch_records(self, set_id: str) -> AsyncGenerator[str, None]:
-        """Fetch data from set"""
+        """Fetch data from set with buckets"""
+        try:
+            fetched_records_count = 0
+            cursor: int = 0
+            while True:
+                cursor, data = await self.__db.sscan(name=set_id, match='*', cursor=cursor, count=BATCH_SIZE)
+                for record in data:
+                    yield record
+                fetched_records_count += len(data)
+                if cursor == 0:
+                    logging.debug('Finishing fetching redis data, records received: %d', fetched_records_count)
+                    break
+        except RedisError as e:
+            logging.error('On redis fetching error occurred, details: %s', str(e))
+            raise SetDbIdentityError('Redis DB Error, details: {}'.format(str(e))) from None
+
+    async def fetch_records_old(self, set_id: str) -> AsyncGenerator[str, None]:
+        """Fetch data from set (old implementation)"""
         try:
             async for record in self.__db.sscan_iter(name=set_id, match='*'):
                 yield record

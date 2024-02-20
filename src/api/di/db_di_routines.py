@@ -3,11 +3,18 @@ from typing import AsyncGenerator
 
 from src.db.adapters.hash_db_entity_str_adapter import HashDbEntityGroupDataStrAdapter
 from src.db.adapters.redis_hash_db_entity_adapter import RedisDBEntityAdapter
+from src.db.adapters.redis_set_db_adapter import RedisSetDbAdapter
 from src.db.adapters.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
+from src.db.adapters.redis_union_set_db_adapter import RedisUnionSetDbAdapter
 from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterIpAddress
+from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterIpNetwork
+from src.db.adapters.set_db_str_adapter import SetDbStrAdapterUUID
+from src.db.adapters.union_set_db_str_adapter import UnionSetDbTransformUUIDAdapter
+from src.db.adapters.union_set_db_str_adapter import generate_str_uuid
 from src.db.base_hash_db_entity import IHashDbEntity
 from src.db.base_set_db_entity import ISetDbEntity
 from src.db.storages.redis_db import redis_client
+from src.service.service_db_factories import ServiceAdapters
 from src.service.service_db_factories import ServiceWithGroupDbAdapters
 
 
@@ -31,4 +38,16 @@ async def address_with_groups_db_service_adapter() -> AsyncGenerator[ServiceWith
         yield ServiceWithGroupDbAdapters(
             db_service_adapter=SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(client_obj)),
             db_hash_service_adapter=HashDbEntityGroupDataStrAdapter(RedisDBEntityAdapter(client_obj)),
+        )
+
+
+async def download_handle_adapters() -> AsyncGenerator[ServiceAdapters, None]:
+    async for client_obj in redis_client():
+        # use one redis connection
+        yield ServiceAdapters(
+            address_set_db_entity=SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(client_obj)),
+            network_set_db_entity=SetDbEntityStrAdapterIpNetwork(RedisSetDbEntityAdapter(client_obj)),
+            hash_db_service=HashDbEntityGroupDataStrAdapter(RedisDBEntityAdapter(client_obj)),
+            set_db=SetDbStrAdapterUUID(RedisSetDbAdapter(client_obj)),
+            union_set_db=UnionSetDbTransformUUIDAdapter(RedisUnionSetDbAdapter(client_obj, generate_str_uuid)),
         )

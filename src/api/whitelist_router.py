@@ -13,15 +13,15 @@ from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterIpNet
 from src.db.storages.redis_db import RedisAsyncio
 from src.db.storages.redis_db import redis_client
 from src.models.query_params_models import DownloadWhitelistQueryParams
-from src.service.addresses_db_service import AllowedAddressesSetDBService
-from src.service.networks_db_service import AllowedNetworksSetDBService
+from src.service.addresses_db_service import AllowedAddressesSetDBEntityService
+from src.service.networks_db_service import AllowedNetworksSetDBEntityService
 
 api_router = APIRouter()
 
 
 async def get_address_records(redis_client_obj: RedisAsyncio) -> AsyncGenerator[str, None]:
     """Get allowed addresses one by one for file processing"""
-    address_service_obj = AllowedAddressesSetDBService(
+    address_service_obj = AllowedAddressesSetDBEntityService(
         SetDbEntityStrAdapterIpAddress(RedisSetDbEntityAdapter(redis_client_obj))
     )
     async for record in address_service_obj.fetch_records():
@@ -30,7 +30,7 @@ async def get_address_records(redis_client_obj: RedisAsyncio) -> AsyncGenerator[
 
 async def get_networks_records(redis_client_obj: RedisAsyncio) -> AsyncGenerator[str, None]:
     """Get allowed networks one by one for file processing"""
-    network_service_obj = AllowedNetworksSetDBService(
+    network_service_obj = AllowedNetworksSetDBEntityService(
         SetDbEntityStrAdapterIpNetwork(RedisSetDbEntityAdapter(redis_client_obj))
     )
     async for record in network_service_obj.fetch_records():

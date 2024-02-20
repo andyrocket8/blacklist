@@ -27,7 +27,7 @@ from src.schemas.common_response_schemas import CountResponseSchema
 from src.schemas.common_response_schemas import DeleteResponseSchema
 from src.schemas.set_group_schemas import GroupSet
 from src.schemas.usage_schemas import ActionType
-from src.service.abstract_set_db_service import AbstractSetDBService
+from src.service.abstract_set_db_entity_service import AbstractSetDBEntityService
 from src.service.groups_db_service import GroupsDbService
 from src.service.service_db_factories import ServiceWithGroupDbAdapters
 from src.service.service_db_factories import any_addresses_db_service_factory
@@ -66,7 +66,7 @@ class AddressHandler:
 
     async def get_service_and_set(
         self, db_service_adapter: ServiceWithGroupDbAdapters, group_name: Optional[str]
-    ) -> tuple[GroupsDbService, AbstractSetDBService, UUID]:
+    ) -> tuple[GroupsDbService, AbstractSetDBEntityService, UUID]:
         groups_service_obj = groups_db_service_factory(
             self.__address_category, db_service_adapter.db_hash_service_adapter
         )
@@ -85,9 +85,12 @@ class AddressHandler:
         _hash_service_obj, service_obj, _group_set_id = await self.get_service_and_set(
             db_service_adapter, query_params.address_group
         )
-        return await service_obj.get_records(
-            records_count=query_params.records_count, all_records=query_params.all_records
-        )
+        return [
+            x
+            async for x in service_obj.fetch_records(
+                records_count=query_params.records_count, all_records=query_params.all_records
+            )
+        ]
 
     async def save_addresses(
         self,

@@ -24,6 +24,11 @@ class ISetDb(ABC, Generic[K]):
     async def exists(self, set_id: K) -> bool:
         pass
 
+    @abstractmethod
+    async def set_ttl(self, set_id: K, timeout: int):
+        """Set TTL for specified set. After timeout expiration it will be eliminated"""
+        pass
+
 
 class BaseSetDb(ISetDb[K], Generic[K]):
     """Base Set for interaction with DB Adapters"""
@@ -39,3 +44,6 @@ class BaseSetDb(ISetDb[K], Generic[K]):
 
     async def exists(self, set_id: K) -> bool:
         return await self.__set_db_adapter.exists(set_id)
+
+    async def set_ttl(self, set_id: K, timeout: int):
+        await self.__set_db_adapter.set_ttl(set_id, timeout)
