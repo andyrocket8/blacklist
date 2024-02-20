@@ -46,8 +46,8 @@ app.include_router(allowed_ip_groups_router, prefix='/addresses/allowed/groups')
 app.include_router(allowed_network_router, prefix='/networks/allowed')
 app.include_router(history_router, prefix='/history')
 app.include_router(ping_router, prefix='/ping')
-app.include_router(blacklist_router, prefix='/blacklist')
-app.include_router(whitelist_router, prefix='/whitelist')
+app.include_router(blacklist_router, prefix='/download/blacklist')
+app.include_router(whitelist_router, prefix='/download/whitelist')
 
 logging.info('Loading blacklist app, version %s', get_version())
 
