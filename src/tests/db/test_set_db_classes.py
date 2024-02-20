@@ -58,3 +58,20 @@ class SetDbEntityStrCarAdapter(BaseSetDbEntityStrAdapter[UUID, Car]):
 
     key_transformer = UUIDStrTransformer
     value_transformer = CarStrTransformation
+
+
+class IntStrTransformation(Transformation[int, str]):
+    @classmethod
+    def transform_to_storage(cls, value: int) -> str:
+        return str(value)
+
+    @classmethod
+    def transform_from_storage(cls, value: str) -> int:
+        return int(value)
+
+
+class SetDbEntityStrIntAdapter(BaseSetDbEntityStrAdapter[UUID, int]):
+    """Entity for sets with UUID as keys and Car as values (for testing purposes)"""
+
+    key_transformer = UUIDStrTransformer
+    value_transformer = IntStrTransformation

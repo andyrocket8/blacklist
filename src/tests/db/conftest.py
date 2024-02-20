@@ -326,3 +326,43 @@ def redis_connection_pool(redis_env_for_test) -> Generator[RedisConnectionPool, 
         pytest.skip('No redis configuration file detected!')
     print(f'Redis config now: {redis_env_for_test}')
     yield RedisConnectionPool(redis_env_for_test.redis_config)
+
+
+# Union set test data
+@pytest.fixture
+def union_set_test_data() -> list[SetTestData[UUID, int]]:
+    return [
+        SetTestData[UUID, int](
+            set_id=uuid4(),
+            set_data=(
+                1,
+                2,
+                3,
+                4,
+                5,
+                4,
+                5,
+            ),
+        ),
+        SetTestData[UUID, int](
+            set_id=uuid4(),
+            set_data=(
+                6,
+                7,
+            ),
+        ),
+        SetTestData[UUID, int](
+            set_id=uuid4(),
+            set_data=(
+                5,
+                6,
+                7,
+                8,
+                9,
+            ),
+        ),
+        SetTestData[UUID, int](
+            set_id=uuid4(),
+            set_data=(5, 6, 7, 8, 9, 10),
+        ),
+    ]
