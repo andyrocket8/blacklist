@@ -1,11 +1,15 @@
 from typing import Annotated
+from typing import Callable
+from typing import Optional
 from typing import Union
 from uuid import UUID
 
 from fastapi import APIRouter
 from fastapi import Depends
+from fastapi.security import HTTPAuthorizationCredentials
 
 from src.api.di.db_di_routines import groups_db_service_adapter
+from src.api.http_auth_wrapper import get_proc_auth_checker
 from src.db.base_hash_db_entity import IHashDbEntity
 from src.schemas.common_response_schemas import DeleteResponseSchema
 from src.schemas.set_group_schemas import AddGroupSet
@@ -13,6 +17,8 @@ from src.schemas.set_group_schemas import GroupSet
 from src.schemas.set_group_schemas import UpdateGroupSet
 from src.service.groups_db_service import GroupsDbService
 from src.service.service_db_factories import groups_db_service_factory
+
+allowed_group_change_auth_check: Callable = get_proc_auth_checker(need_admin_permission=True)
 
 
 class AddressesGroupHandler:
@@ -46,6 +52,7 @@ class AddressesGroupHandler:
         self,
         group_data: AddGroupSet,
         db_service_adapter: Annotated[IHashDbEntity, Depends(groups_db_service_adapter)],
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(allowed_group_change_auth_check),  # noqa: B008
     ) -> GroupSet:
         db_service = self.__get_service_obj(db_service_adapter)
         return await db_service.add_group(group_data)
@@ -54,6 +61,7 @@ class AddressesGroupHandler:
         self,
         group_set_id: UUID,
         db_service_adapter: Annotated[IHashDbEntity, Depends(groups_db_service_adapter)],
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(allowed_group_change_auth_check),  # noqa: B008
     ) -> DeleteResponseSchema:
         db_service = self.__get_service_obj(db_service_adapter)
         return DeleteResponseSchema(deleted=await db_service.delete_group(group_set_id))
@@ -63,6 +71,7 @@ class AddressesGroupHandler:
         group_set_id: UUID,
         group_data: UpdateGroupSet,
         db_service_adapter: Annotated[IHashDbEntity, Depends(groups_db_service_adapter)],
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(allowed_group_change_auth_check),  # noqa: B008
     ):
         db_service = self.__get_service_obj(db_service_adapter)
         return await db_service.update_group(group_set_id, group_data)

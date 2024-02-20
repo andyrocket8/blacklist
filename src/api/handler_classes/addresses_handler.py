@@ -143,7 +143,6 @@ class AddressHandler:
         )
         deleted_count = await service_obj.del_records(agent_info.addresses)
         if len(agent_info.addresses) <= BACKGROUND_DELETE_RECORDS:
-            # TODO Adopt background services
             background_tasks.add_task(
                 update_history_bg_task_ns,
                 ACTIVE_USAGE_INFO,
@@ -154,7 +153,6 @@ class AddressHandler:
             )
         else:
             # invoke celery task for update usage
-            # TODO Adopt celery tasks
             agent_info_dict = agent_info.encode()
             celery_update_history_task.apply_async(agent_info_dict, ActionType.remove_action, self.__address_category)
 
