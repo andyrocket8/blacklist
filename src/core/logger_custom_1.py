@@ -51,15 +51,8 @@ LOGGING = {
         },
     },
     'root': {
-        'level': 'INFO',
+        'level': 'DEBUG',
         'formatter': 'verbose',
         'handlers': LOG_DEFAULT_HANDLERS,
     },
 }
-
-
-# feel free to load custom log settings from logger_custom.py
-try:
-    from .logger_custom import *  # type: ignore[import-not-found] # noqa F403, F401
-except ImportError:
-    pass

@@ -3,7 +3,7 @@
 from src.core.settings import ACTIVE_USAGE_INFO
 from src.schemas.usage_schemas import UsageClassesEncoder
 from src.schemas.usage_schemas import UsageRecord
-from src.service.__to_delete.abstract_hkey_db_service import AbstractHkeyDBService
+from src.service.abstract_hkey_db_service import AbstractHkeyDBService
 
 
 class UsageDBService(AbstractHkeyDBService[UsageRecord, UsageClassesEncoder]):
