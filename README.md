@@ -109,4 +109,7 @@ On image build your file will be linked with distribution redis.conf by its impo
 Not known
 
 ## Custom logging
-Custom logging available by substitution of /src/core/logger.py file. Use dictionary logging config feature (https://docs.python.org/3/library/logging.config.html)
+Custom logging available by adding of /src/core/logger_custom.py file.
+If exists it would be loaded on application startup
+
+Use dictionary logging config feature (https://docs.python.org/3/library/logging.config.html)

@@ -16,6 +16,7 @@ from fastapi.responses import StreamingResponse
 from src.api.di.db_di_routines import download_handle_adapters
 from src.core.settings import ALLOWED_ADDRESSES_GROUP_NAME
 from src.core.settings import BANNED_ADDRESSES_GROUP_NAME
+from src.core.settings import CHUNK_SIZE_BYTES
 from src.core.settings import SET_EXPIRE_SECONDS
 from src.models.query_params_models import DownloadBlackListQueryParams
 from src.service.blacklist_service import BlacklistService
@@ -131,7 +132,7 @@ async def banned_addresses_as_file(
             banned_set_id, allowed_addresses_set, allowed_networks_set, records_count
         ):
             accumulated += address
-            if len(accumulated) > 10000:
+            if len(accumulated) > CHUNK_SIZE_BYTES:
                 result.append(accumulated)
                 accumulated = ''
         result.append(accumulated)

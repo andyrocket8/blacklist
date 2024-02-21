@@ -36,6 +36,9 @@ BACKGROUND_ADD_RECORDS = 50
 BACKGROUND_DELETE_RECORDS = 50
 # Size of addresses storages implemented as lists (otherwise frozen set is used)
 MAX_STORAGE_LIST_SIZE = 10
+# size of allowed network (addresses count) for caching in allowed addresses set.
+# If size of network is greater than ALLOWED_NETWORKS_CACHE_SIZE it will be cached only for first
+# ALLOWED_NETWORKS_CACHE_SIZE network members
 ALLOWED_NETWORKS_CACHE_SIZE = 1000
 
 # History param detection mask
@@ -48,6 +51,10 @@ REDIS_DOCKER_IMAGE_NAME = 'redis:7.2.3-alpine3.18'
 # Addresses constants
 ALLOWED_ADDRESSES_CATEGORY_NAME = 'allowed addresses'
 BANNED_ADDRESSES_CATEGORY_NAME = 'banned addresses'
+
+# Download constants
+# Size of piece for StreamingResponse
+CHUNK_SIZE_BYTES = 10000
 
 # Default group consts
 DEFAULT_GROUP_NAME = 'default'
