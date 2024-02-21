@@ -28,21 +28,23 @@ _test:
 _check:
 		isort .
 		flake8 -v --config setup.cfg
-		mypy src
+		mypy .
 		black .
-		pytest
+		pytest -s
 
 _start_dev:
-		echo "set -a && source compose-redis.env && docker compose -f docker-compose-dev.yml up -d --build" | bash
+		# echo "set -a && source compose-redis.env && docker compose -f docker-compose-dev.yml up -d --build" | bash
+		echo "set -a && docker compose -f docker-compose-dev.yml up -d --build" | bash
 
 _stop_dev:
-		echo "set -a && source compose-redis.env && docker compose -f docker-compose-dev.yml down" | bash
+		# echo "set -a && source compose-redis.env && docker compose -f docker-compose-dev.yml down" | bash
+		echo "set -a && docker compose -f docker-compose-dev.yml down" | bash
 
 _start_local:
-		echo "set -a && source compose-redis-local.env && docker compose --env-file compose-redis-local.env -f docker-compose.yml up -d --build" | bash
+		echo "set -a && docker compose --env-file compose-redis-local.env -f docker-compose.yml up -d --build" | bash
 
 _stop_local:
-		echo "set -a && source compose-redis-local.env && docker compose --env-file compose-redis-local.env -f docker-compose.yml down" | bash
+		echo "set -a && docker compose --env-file compose-redis-local.env -f docker-compose.yml down" | bash
 
 _start_celery:
 		echo "celery -A src.celery_app worker -l DEBUG" | bash &

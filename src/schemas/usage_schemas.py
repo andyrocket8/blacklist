@@ -3,6 +3,7 @@ from enum import Enum
 from ipaddress import IPv4Address
 from json import JSONEncoder
 from typing import Annotated
+from typing import Optional
 
 from pydantic import BaseModel
 from pydantic import Field
@@ -27,6 +28,8 @@ class HistoryRecordInfo(BaseModel):
     source: str
     action_time: Annotated[datetime.datetime, Field(default_factory=now_cur_tz)]
     action_type: ActionType
+    address_category: Optional[str] = None  # address list category (if not set then it is blacklist)
+    address_group: Optional[str] = None  # address list group (if not set then it is default group)
 
 
 class HistoryRecord(BaseModel):

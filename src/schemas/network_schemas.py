@@ -2,10 +2,12 @@
 
 from ipaddress import IPv4Network
 from json import JSONEncoder
+from typing import Iterable
 
 from .base_input_schema import BaseInputSchema
 
 IPv4NetworkList = list[IPv4Network]
+IPv4NetworkIterable = Iterable[IPv4Network]
 
 
 class IpNetworkEncoder(JSONEncoder):

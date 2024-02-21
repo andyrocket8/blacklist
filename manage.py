@@ -8,16 +8,20 @@ from typing import Optional
 from typing import Type
 from typing import Union
 
-from src.db.redis_db import context_async_redis_client
-from src.service.token_db_services import AdminTokensSetDBService
-from src.service.token_db_services import AgentTokensSetDBService
+from src.db.adapters.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
+from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterUUID
+from src.db.storages.redis_db import context_async_redis_client
+from src.service.token_db_services import AdminTokensSetDBEntityService
+from src.service.token_db_services import AgentTokensSetDBEntityService
 
 
 async def process_token(
-    token_db_srv: Type[Union[AgentTokensSetDBService, AdminTokensSetDBService]], token: uuid.UUID, type_of_service: str
+    token_db_srv: Type[Union[AgentTokensSetDBEntityService, AdminTokensSetDBEntityService]],
+    token: uuid.UUID,
+    type_of_service: str,
 ):
     async with context_async_redis_client('token administration task') as redis_client:
-        db_srv = token_db_srv(redis_client)
+        db_srv = token_db_srv(SetDbEntityStrAdapterUUID(RedisSetDbEntityAdapter(redis_client)))
         await db_srv.write_records([token])
         logging.info(
             'Added/Updated %s in storage, token info %s', type_of_service, str(token)[:4] + '....' + str(token)[-4:]
@@ -29,7 +33,7 @@ def process_tokens(admin_token: Optional[uuid.UUID], agent_token: Optional[uuid.
     assert token is not None, 'Token variable must be not None'
     asyncio.run(
         process_token(
-            token_db_srv=AgentTokensSetDBService if agent_token else AdminTokensSetDBService,
+            token_db_srv=AgentTokensSetDBEntityService if agent_token else AdminTokensSetDBEntityService,
             token=token,
             type_of_service='agent token' if agent_token else 'admin_token',
         )
