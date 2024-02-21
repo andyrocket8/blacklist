@@ -8,7 +8,7 @@ from typing import cast
 from redis.asyncio import Redis as RedisAsyncio
 from redis.asyncio import RedisError
 
-from src.core.settings import BATCH_SIZE
+from src.core.settings import REDIS_FETCH_SIZE
 from src.db.base_set_db_entity import ISetDbEntity
 from src.db.base_set_db_entity import SetDbIdentityError
 
@@ -45,12 +45,13 @@ class RedisSetDbEntityAdapter(ISetDbEntity[str, str]):
             fetched_records_count = 0
             cursor: int = 0
             while True:
-                cursor, data = await self.__db.sscan(name=set_id, match='*', cursor=cursor, count=BATCH_SIZE)
+                cursor, data = await self.__db.sscan(name=set_id, match='*', cursor=cursor, count=REDIS_FETCH_SIZE)
+                logging.debug('Redis data arrived, records received: %d', len(data))
                 for record in data:
                     yield record
                 fetched_records_count += len(data)
                 if cursor == 0:
-                    logging.debug('Finishing fetching redis data, records received: %d', fetched_records_count)
+                    logging.debug('Finishing fetching all redis data, records received: %d', fetched_records_count)
                     break
         except RedisError as e:
             logging.error('On redis fetching error occurred, details: %s', str(e))

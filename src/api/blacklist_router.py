@@ -21,6 +21,7 @@ from src.models.query_params_models import DownloadBlackListQueryParams
 from src.service.blacklist_service import BlacklistService
 from src.service.blacklist_service import BlackListServiceError
 from src.service.service_db_factories import ServiceAdapters
+from src.tasks.set_management_bg_tasks import delete_temp_sets_bg
 
 api_router = APIRouter()
 
@@ -122,11 +123,21 @@ async def banned_addresses_as_file(
             )
         records_count: int = 0 if query_params.all_records else query_params.records_count
         # add teardown task for clearing temporarily sets
-        background_tasks.add_task(blacklist_service_obj.remove_temp_sets, teardown_sets)
+        background_tasks.add_task(delete_temp_sets_bg, teardown_sets)
+        # Need to fetch all data here
+        result = list()
+        accumulated = ''
+        async for address in blacklist_service_obj.get_banned_addresses(
+            banned_set_id, allowed_addresses_set, allowed_networks_set, records_count
+        ):
+            accumulated += address
+            if len(accumulated) > 10000:
+                result.append(accumulated)
+                accumulated = ''
+        result.append(accumulated)
+        logging.debug('Finish gathering result, records count: %d', len(result))
         return StreamingResponse(
-            blacklist_service_obj.get_banned_addresses(
-                banned_set_id, allowed_addresses_set, allowed_networks_set, records_count
-            ),
+            result,
             media_type='text/plain',
             headers=headers,
         )
@@ -138,5 +149,5 @@ async def banned_addresses_as_file(
         duration = dt_datetime.now() - start_moment
         logging.debug(
             'Finished blacklist query execution, elapsed %s milliseconds',
-            duration.seconds + duration.microseconds / 1000,
+            duration.seconds * 1000 + duration.microseconds / 1000,
         )

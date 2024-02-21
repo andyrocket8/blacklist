@@ -3,6 +3,8 @@ import logging
 from contextlib import asynccontextmanager
 from typing import Any
 from typing import AsyncGenerator
+from uuid import UUID
+from uuid import uuid4
 
 from redis.asyncio import ConnectionPool
 from redis.asyncio import Redis as RedisAsyncio
@@ -35,14 +37,14 @@ async def redis_pool_client(connection_pool_obj: RedisConnectionPool) -> AsyncGe
     Generator for obtaining redis client
     :rtype AsyncGenerator[RedisAsyncio, None]
     """
-    client = RedisAsyncio.from_pool(connection_pool_obj.connection_pool)
-    logging.debug('Obtaining redis client connection')
+    redis_client_id: UUID = uuid4()
+    client = RedisAsyncio(connection_pool=connection_pool_obj.connection_pool)
+    logging.debug('Obtaining redis client connection, client ID: %s', redis_client_id)
     try:
         yield client
     finally:
-        if client.connection or client.connection_pool:
-            logging.debug('Closing redis client connection')
-            await client.aclose()
+        logging.debug('Closing redis client connection, client ID: %s', redis_client_id)
+        await client.aclose(close_connection_pool=False)
 
 
 @asynccontextmanager
@@ -50,10 +52,11 @@ async def context_async_redis_pool_client(
     connection_pool_obj: RedisConnectionPool, job_name: str
 ) -> AsyncGenerator[RedisAsyncio, None]:
     """Connection manager for async jobs (auth checks, celery jobs)"""
-    client: RedisAsyncio = RedisAsyncio.from_pool(connection_pool_obj.connection_pool)
-    logging.debug('Obtaining redis client connection for %s job', job_name)
+    redis_client_id: UUID = uuid4()
+    client: RedisAsyncio = RedisAsyncio(connection_pool=connection_pool_obj.connection_pool)
+    logging.debug('Obtaining redis client connection for %s job, client ID: %s', job_name, redis_client_id)
     try:
         yield client
     finally:
-        logging.debug('Closing redis client connection for %s job', job_name)
-        await client.aclose()
+        logging.debug('Closing redis client connection for %s job, client ID: %s', job_name, redis_client_id)
+        await client.aclose(close_connection_pool=False)

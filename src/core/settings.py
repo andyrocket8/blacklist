@@ -31,10 +31,12 @@ SET_EXPIRE_SECONDS = 600
 
 # Sets Constants
 BATCH_SIZE = 1000
+REDIS_FETCH_SIZE = 2000
 BACKGROUND_ADD_RECORDS = 50
 BACKGROUND_DELETE_RECORDS = 50
 # Size of addresses storages implemented as lists (otherwise frozen set is used)
 MAX_STORAGE_LIST_SIZE = 10
+ALLOWED_NETWORKS_CACHE_SIZE = 1000
 
 # History param detection mask
 HISTORY_TIMEDELTA_MASK = r'^([0-9]+)([smhd]{1})$'
