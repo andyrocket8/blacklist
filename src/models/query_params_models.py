@@ -56,9 +56,8 @@ class DownloadBlackListQueryParams(DownloadListQueryParams):
 @dataclass
 class DownloadWhitelistQueryParams(DownloadListQueryParams):
     with_networks: bool = Query(False, description='Add allowed networks in download set')
-    # TODO rename to make similar as in DownloadBlackListQueryParams
-    groups: Optional[str] = Query(
-        None, description='Groups to download, list separated by comma. If not specified then download all groups'
+    allowed_groups: str = Query(
+        '', description='Groups to download, list separated by comma. If not specified then download all groups'
     )
 
 
