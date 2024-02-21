@@ -12,6 +12,7 @@ from fastapi.responses import StreamingResponse
 
 from src.api.di.db_di_routines import download_handle_adapters
 from src.core.settings import ALLOWED_ADDRESSES_GROUP_NAME
+from src.core.settings import CHUNK_SIZE_BYTES
 from src.core.settings import SET_EXPIRE_SECONDS
 from src.models.query_params_models import DownloadWhitelistQueryParams
 from src.service.service_db_factories import ServiceAdapters
@@ -64,7 +65,7 @@ async def allowed_addresses_as_file(
             allowed_set_id, query_params.with_networks, records_count
         ):
             accumulated += address
-            if len(accumulated) > 10000:
+            if len(accumulated) > CHUNK_SIZE_BYTES:
                 result.append(accumulated)
                 accumulated = ''
         result.append(accumulated)
