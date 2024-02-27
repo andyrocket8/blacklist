@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "blacklist"
-version = "1.8.1"
+version = "1.8.2"
 description = ""
 authors = ["Dmitriev Andrey <justkeepwalking@yandex.ru>"]
 readme = "README.md"
@@ -9,7 +9,7 @@ packages = [{include = "src"}]
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
 fastapi = "^0.109.0"
-uvicorn = "^0.27.0"
+uvicorn = {extras = ["standard"], version = "^0.27.1"}
 pydantic-settings = "^2.1.0"
 orjson = "^3.9.10"
 redis = "^5.0.1"
