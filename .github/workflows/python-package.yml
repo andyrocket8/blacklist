@@ -30,10 +30,10 @@ jobs:
         python -m pip install --no-cache-dir poetry==1.7.1
         poetry config virtualenvs.in-project true
         poetry install --no-interaction --no-ansi --no-root
-        
+
     - name: Lint with flake8
-      run: |        
-        poetry run flake8        
+      run: |
+        poetry run flake8
     - name: Lint with mypy
       run: |
         poetry run mypy .
