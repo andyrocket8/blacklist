@@ -31,8 +31,6 @@ click==8.1.7 ; python_version >= "3.11" and python_version < "3.12" \
 colorama==0.4.6 ; python_version >= "3.11" and python_version < "3.12" and (sys_platform == "win32" or platform_system == "Windows") \
     --hash=sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44 \
     --hash=sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6
-evloop==0.1.0 ; python_version >= "3.11" and python_version < "3.12" \
-    --hash=sha256:3cd9d4ec81b7758de6ccd2542b2ae0751c1266853ebd38470d370b8a911a59dc
 fastapi==0.109.2 ; python_version >= "3.11" and python_version < "3.12" \
     --hash=sha256:2c9bab24667293b501cad8dd388c05240c850b58ec5876ee3283c47d6e1e3a4d \
     --hash=sha256:f3817eac96fe4f65a2ebb4baa000f394e55f5fccdaf7f75250804bc58f354f73
