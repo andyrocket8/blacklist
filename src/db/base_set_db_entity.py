@@ -45,31 +45,3 @@ class ISetDbEntity(ABC, Generic[K, V]):
     async def contains(self, set_id: K, value: V) -> bool:
         """Check whether set contains value from set"""
         pass
-
-
-class BaseSetDbEntity(ISetDbEntity[K, V], Generic[K, V]):
-    """Wrapper for use without definite DB Entity Adapter (for further dependency injection)"""
-
-    def __init__(self, set_db_entity_adapter: ISetDbEntity[K, V]):
-        self.__set_db_entity_a = set_db_entity_adapter
-
-    async def add_to_set(self, set_id: K, added_data: Iterable[V]) -> int:
-        """Add data to set"""
-        return await self.__set_db_entity_a.add_to_set(set_id, added_data)
-
-    async def del_from_set(self, set_id: K, deleted_data: Iterable[V]) -> int:
-        """Remove data from set"""
-        return await self.__set_db_entity_a.del_from_set(set_id, deleted_data)
-
-    async def fetch_records(self, set_id: K) -> AsyncGenerator[V, None]:
-        """Fetch data from set"""
-        async for value in self.__set_db_entity_a.fetch_records(set_id):
-            yield value
-
-    async def count(self, set_id: K) -> int:
-        """Get records count from set"""
-        return await self.__set_db_entity_a.count(set_id)
-
-    async def contains(self, set_id: K, value: V) -> bool:
-        """Check whether set contains value from set"""
-        return await self.__set_db_entity_a.contains(set_id, value)

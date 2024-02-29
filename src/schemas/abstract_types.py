@@ -14,9 +14,10 @@ TypeH = Type[H]
 K = TypeVar('K', bound=Hashable)
 TypeK = Type[K]
 
-# Abstract type for set values
+# Abstract type for values
 V = TypeVar('V')
 TypeV = Type[V]
+
 
 # Abstract type for storages
 Internal = TypeVar('Internal')
