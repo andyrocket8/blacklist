@@ -28,10 +28,10 @@ class BaseStreamDbAdapter(
 ):
     """Wrapper for DB Entity Adapter"""
 
-    stream_key_transformer: Type[Transformation[SK, SKInternal]]
-    ts_transformer: Type[Transformation[IK, IKInternal]]
-    key_transformer: Type[Transformation[K, KInternal]]
-    value_transformer: Type[Transformation[V, VInternal]]
+    stream_key_transformer: Type[Transformation[SK, SKInternal]]  # transformer for streams
+    ts_transformer: Type[Transformation[IK, IKInternal]]  # transformer for timestamp identity
+    key_transformer: Type[Transformation[K, KInternal]]  # transformer for key
+    value_transformer: Type[Transformation[V, VInternal]]  # transformer for value
 
     def __init__(self, stream_db_adapter: IStreamDb[SKInternal, IKInternal, KInternal, VInternal]):
         self.__stream_db_a = stream_db_adapter
