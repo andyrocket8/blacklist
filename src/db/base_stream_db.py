@@ -13,9 +13,14 @@ from src.schemas.abstract_types import V
 
 # Key value for stream
 SK = TypeVar('SK')
+# Key value for stream (Internal storage of adapter)
+SKInternal = TypeVar('SKInternal')
+
 
 # Timestamp key for stream (id)
 IK = TypeVar('IK')
+# Timestamp key for stream (id), internal type for storage adapter
+IKInternal = TypeVar('IKInternal')
 
 
 class IStreamDbError(Exception):

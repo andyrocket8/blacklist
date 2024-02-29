@@ -11,7 +11,7 @@ from src.schemas.abstract_types import V
 from src.schemas.abstract_types import VInternal
 
 
-class ISetDbEntityAdapter(ISetDbEntity[K, V], Generic[K, V, KInternal, VInternal]):
+class BaseSetDbEntityAdapter(ISetDbEntity[K, V], Generic[K, V, KInternal, VInternal]):
     """Wrapper for DB Entity Adapter"""
 
     key_transformer: Type[Transformation[K, KInternal]]
@@ -50,7 +50,7 @@ class ISetDbEntityAdapter(ISetDbEntity[K, V], Generic[K, V, KInternal, VInternal
         )
 
 
-class BaseSetDbEntityStrAdapter(ISetDbEntityAdapter[K, V, str, str], Generic[K, V]):
+class BaseSetDbEntityStrAdapter(BaseSetDbEntityAdapter[K, V, str, str], Generic[K, V]):
     """Base Entity for storages with str keys and str values"""
 
     pass
