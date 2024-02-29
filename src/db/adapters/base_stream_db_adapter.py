@@ -13,6 +13,7 @@ from src.db.base_stream_db import SKInternal
 from src.models.transformation import Transformation
 from src.schemas.abstract_types import K
 from src.schemas.abstract_types import KInternal
+from src.schemas.abstract_types import T
 from src.schemas.abstract_types import V
 from src.schemas.abstract_types import VInternal
 
@@ -87,3 +88,59 @@ class BaseStreamDbAdapter(
                 self.key_transformer.transform_from_storage(k): self.value_transformer.transform_from_storage(v)
                 for k, v in record[1].items()
             }
+
+
+class BaseEntityStreamAdapter(
+    Generic[SK, IK, T, SKInternal, IKInternal, KInternal, VInternal],
+):
+    """Stream Adapter for storing Entities as dicts"""
+
+    stream_key_transformer: Type[Transformation[SK, SKInternal]]  # transformer for streams
+    ts_transformer: Type[Transformation[IK, IKInternal]]
+    entity_transformer: Transformation[T, dict[KInternal, VInternal]]
+
+    def __init__(self, stream_db_adapter: IStreamDb[SKInternal, IKInternal, KInternal, VInternal]):
+        self.__stream_db_adapter = stream_db_adapter
+
+    async def save(self, stream_id: SK, value: T, timestamp_id: Optional[IK] = None) -> IK:
+        return self.ts_transformer.transform_from_storage(
+            await self.__stream_db_adapter.save(
+                self.stream_key_transformer.transform_to_storage(stream_id),
+                self.entity_transformer.transform_to_storage(value),
+                timestamp_id=(
+                    self.ts_transformer.transform_to_storage(timestamp_id) if timestamp_id is not None else None
+                ),
+            )
+        )
+
+    async def save_by_timestamp(self, stream_id: SK, value: T, timestamp: Optional[int] = None) -> IK:
+        return self.ts_transformer.transform_from_storage(
+            await self.__stream_db_adapter.save_by_timestamp(
+                self.stream_key_transformer.transform_to_storage(stream_id),
+                self.entity_transformer.transform_to_storage(value),
+                timestamp,
+            )
+        )
+
+    async def delete(self, stream_id: SK, ids: Iterable[IK]) -> int:
+        return await self.__stream_db_adapter.delete(
+            self.stream_key_transformer.transform_to_storage(stream_id),
+            map(self.ts_transformer.transform_to_storage, ids),
+        )
+
+    async def read(self, stream_id: SK, timestamp_id: IK) -> Optional[T]:
+        values: dict[KInternal, VInternal] = await self.__stream_db_adapter.read(
+            self.stream_key_transformer.transform_to_storage(stream_id),
+            self.ts_transformer.transform_to_storage(timestamp_id),
+        )
+        return self.entity_transformer.transform_from_storage(values) if values else None
+
+    async def fetch_records(
+        self, stream_id: SK, start_ts: int, end_ts: Optional[int] = None
+    ) -> AsyncGenerator[tuple[IK, T], None]:
+        async for record in self.__stream_db_adapter.fetch_records(
+            self.stream_key_transformer.transform_to_storage(stream_id), start_ts, end_ts
+        ):
+            yield self.ts_transformer.transform_from_storage(record[0]), self.entity_transformer.transform_from_storage(
+                record[1]
+            )

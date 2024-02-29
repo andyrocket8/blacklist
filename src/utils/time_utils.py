@@ -24,3 +24,8 @@ def get_timedelta_for_history_query(param_value: str) -> Optional[datetime.timed
 
 def get_current_time_with_tz() -> datetime.datetime:
     return datetime.datetime.now(tz=CUR_TZ)
+
+
+def get_epoch_time() -> int:
+    """Return unix epoch time in millis"""
+    return int(round(datetime.datetime.now().timestamp() * 1000, 0))
