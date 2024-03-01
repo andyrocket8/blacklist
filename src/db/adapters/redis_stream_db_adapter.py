@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime as dt_datetime
 from typing import AsyncGenerator
 from typing import Iterable
 from typing import Optional
@@ -9,11 +10,12 @@ from redis.asyncio import RedisError
 
 from src.core.settings import MAX_BUNDLE_SIZE
 from src.db.base_stream_db import IStreamDbError
+from src.utils.time_utils import get_epoch_time
 
 from .base_stream_db_adapter import IStreamDbAdapter
 
 
-class RedisStreamDbAdapter(IStreamDbAdapter[str, str, str, bytes]):
+class RedisStreamDbAdapter(IStreamDbAdapter[str, str, dict[str, bytes]]):
     """Adapter for redis storing keys as str, values as bytes
     Timestamp values are stored in str, transformed to str from unix epoch with suffix if unique int
     """
@@ -34,13 +36,15 @@ class RedisStreamDbAdapter(IStreamDbAdapter[str, str, str, bytes]):
             logging.error(f'Error while saving stream data, stream ID: {stream_id}, details: {str(e)}')
             raise IStreamDbError from None
 
-    async def save_by_timestamp(self, stream_id: str, values: dict[str, bytes], timestamp: Optional[int] = None) -> str:
+    async def save_by_timestamp(
+        self, stream_id: str, values: dict[str, bytes], timestamp: Optional[dt_datetime] = None
+    ) -> str:
         try:
             return await self.__db.xadd(
                 stream_id,
                 # some mypy lint error patching here
                 cast(dict[bytes | memoryview | str | int | float, bytes | memoryview | str | int | float], values),
-                id=f'{timestamp}-*',
+                id=f'{get_epoch_time(timestamp)}-*' if timestamp is not None else '*',
             )
         except RedisError as e:
             logging.error(f'Error while saving stream data, stream ID: {stream_id}, details: {str(e)}')
@@ -63,12 +67,12 @@ class RedisStreamDbAdapter(IStreamDbAdapter[str, str, str, bytes]):
             raise IStreamDbError from None
 
     async def fetch_records(
-        self, stream_id: str, start_ts: int, end_ts: Optional[int] = None
+        self, stream_id: str, start_ts: Optional[dt_datetime] = None, end_ts: Optional[dt_datetime] = None
     ) -> AsyncGenerator[tuple[str, dict[str, bytes]], None]:
         # here we will try to make some bundle read from redis for better performance
         try:
-            start_ts_id = str(start_ts)
-            end_ts_id = f'{end_ts}-*' if end_ts is not None else '+'
+            start_ts_id = f'{get_epoch_time(start_ts)}-*' if start_ts is not None else '-'
+            end_ts_id = f'{get_epoch_time(end_ts)}-*' if end_ts is not None else '+'
             while True:
                 values = await self.__db.xrange(stream_id, start_ts_id, end_ts_id, count=self.__max_bundle_size)
                 if len(values):

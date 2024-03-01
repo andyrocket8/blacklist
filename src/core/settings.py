@@ -4,6 +4,11 @@ from uuid import UUID
 MSK_TZ = zoneinfo.ZoneInfo('Europe/Moscow')
 CUR_TZ = MSK_TZ  # alias for current timezone. You are free to redeclare it in further implementations
 
+# Mask for datetime storing as JSON
+ENCODE_DT_MASK = '%Y-%m-%d-%H:%M:%S.%f%z'
+DECODE_DT_MASK_NO_TZ = '%Y-%m-%d-%H:%M:%S.%f'
+
+
 POETRY_CONFIG_FIlE = 'pyproject.toml'
 
 # Redis constants

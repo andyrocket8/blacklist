@@ -2,6 +2,7 @@ import logging
 import random
 from dataclasses import dataclass
 from datetime import date as dt_date
+from datetime import datetime as dt_datetime
 from ipaddress import IPv4Address
 from ipaddress import IPv4Network
 from typing import Generator
@@ -18,6 +19,8 @@ from .test_hash_db_classes import HostInfo
 from .test_hash_db_classes import NetworkInfo
 from .test_set_db_classes import Car
 from .test_set_db_classes import SetTestData
+from .test_stream_db_classes import StockInfo
+from .test_stream_db_classes import StockTestData
 
 # Initialize logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s [%(name)s] %(message)s')
@@ -368,5 +371,35 @@ def union_set_test_data() -> list[SetTestData[UUID, int]]:
         SetTestData[UUID, int](
             set_id=uuid4(),
             set_data=(5, 6, 7, 8, 9, 10),
+        ),
+    ]
+
+
+@pytest.fixture
+def stock_test_data() -> list[StockTestData]:
+    return [
+        StockTestData(
+            order=3,
+            stock_data=StockInfo(
+                stock_name='Total Securities Inc', datetime=dt_datetime(2023, 12, 1, 18, 2, 15), bid=90.4, ask=93.1
+            ),
+        ),
+        StockTestData(
+            order=0,
+            stock_data=StockInfo(
+                stock_name='Total Securities Inc', datetime=dt_datetime(2023, 12, 1, 18, 0, 3), bid=89.1, ask=90.4
+            ),
+        ),
+        StockTestData(
+            order=2,
+            stock_data=StockInfo(
+                stock_name='Total Securities Inc', datetime=dt_datetime(2023, 12, 1, 18, 1, 12), bid=88.9, ask=90.1
+            ),
+        ),
+        StockTestData(
+            order=1,
+            stock_data=StockInfo(
+                stock_name='Extra Brewery Co', datetime=dt_datetime(2023, 12, 1, 18, 0, 3), bid=16.12, ask=16.42
+            ),
         ),
     ]
