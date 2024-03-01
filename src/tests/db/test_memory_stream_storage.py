@@ -8,9 +8,9 @@ import pytest
 from src.db.storages.memory_stream_storage import MemoryStreamTsStorage
 from src.models.transformation import Transformation
 from src.models.transformation import TransformOneToOne
-from src.tests.db.test_stream_db_classes import StockInfo
-from src.tests.db.test_stream_db_classes import StockInfoStreamAdapter
-from src.tests.db.test_stream_db_classes import StocksTestDataSet
+from src.tests.db.classes_for_stream_db_test import StockInfo
+from src.tests.db.classes_for_stream_db_test import StockInfoStreamAdapter
+from src.tests.db.classes_for_stream_db_test import StocksTestDataSet
 
 
 class StockInfoStrStreamAdapter(StockInfoStreamAdapter[int, str, int, str]):
@@ -31,7 +31,7 @@ async def test_memory_stream_storage(stocks_set_test_data: StocksTestDataSet):
     During this test we use memory storage for storing streams with int identities, keys as str, and values as bytes
     Also we need adapter to transform StockInfo to dict[str, bytes] while storing and back on restoring
 
-    Testing methods:
+    Testing the following methods of adapter:
     - save
     - save_by_timestamp
     - delete
@@ -39,7 +39,9 @@ async def test_memory_stream_storage(stocks_set_test_data: StocksTestDataSet):
     - fetch_records (straightforward and with filtering)
 
     """
+    # obtain the random id for set 1
     set_1: int = random.randint(10, 20)
+    # obtain the random id for set 2
     set_2: int = random.randint(30, 40)
     print(set_1, set_2)
     storage_obj = MemoryStreamTsStorage[int, bytes]()
@@ -95,3 +97,10 @@ async def test_memory_stream_storage(stocks_set_test_data: StocksTestDataSet):
     assert (await memory_stream_adapter.delete(set_2, map(lambda x: x.timestamp, records))) == len(
         stock_test_data
     ), 'Expecting to delete only existing records in set 2'
+    # assure the data is cleaned from storage
+    assert (
+        len([storage_record async for storage_record in memory_stream_adapter.fetch_records(set_1)]) == 0
+    ), 'Set 1 must be cleared on end of the test'
+    assert (
+        len([storage_record async for storage_record in memory_stream_adapter.fetch_records(set_2)]) == 0
+    ), 'Set 2 must be cleared on end of the test'

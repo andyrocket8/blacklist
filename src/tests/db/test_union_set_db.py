@@ -20,9 +20,9 @@ from src.db.base_set_db_entity import ISetDbEntity
 from src.db.base_union_set_db import IUnionSetDb
 from src.db.storages.memory_set_storage import MemorySetStorage
 
-from .test_set_db_classes import SetDbEntityStrIntAdapter
-from .test_set_db_classes import SetTestData
-from .union_set_db_tools import run_test_union_set_db_entity
+from .classes_for_set_db_test import SetDbEntityStrIntAdapter
+from .classes_for_set_db_test import SetTestData
+from .tools_for_union_set_db_test import run_test_union_set_db_entity
 
 
 @pytest.fixture(scope='function')

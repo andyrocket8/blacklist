@@ -11,12 +11,12 @@ from src.db.adapters.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
 from src.db.base_set_db_entity import ISetDbEntity
 from src.db.storages.memory_set_storage import MemorySetStorage
 
-from .set_db_entity_base_tools import run_test_set_db_entity
-from .set_db_entity_base_tools import teardown_test_set_db_entity
+from .classes_for_set_db_test import Car
+from .classes_for_set_db_test import SetDbEntityStrCarAdapter
+from .classes_for_set_db_test import SetTestData
 from .test_memory_set_storage import STORAGE_DATA_ATTR
-from .test_set_db_classes import Car
-from .test_set_db_classes import SetDbEntityStrCarAdapter
-from .test_set_db_classes import SetTestData
+from .tools_for_set_db_entity_test import run_test_set_db_entity
+from .tools_for_set_db_entity_test import teardown_test_set_db_entity
 
 
 @pytest.fixture

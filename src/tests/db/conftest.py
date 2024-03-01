@@ -15,15 +15,15 @@ import pytest
 
 from src.db.storages.redis_db_pool import RedisConnectionPool
 
-from .test_hash_db_classes import AddressInfo
-from .test_hash_db_classes import HostInfo
-from .test_hash_db_classes import NetworkInfo
-from .test_set_db_classes import Car
-from .test_set_db_classes import SetTestData
-from .test_stream_db_classes import CheckFilterData
-from .test_stream_db_classes import StockInfo
-from .test_stream_db_classes import StocksTestDataSet
-from .test_stream_db_classes import StockTestData
+from .classes_for_hash_db_test import AddressInfo
+from .classes_for_hash_db_test import HostInfo
+from .classes_for_hash_db_test import NetworkInfo
+from .classes_for_set_db_test import Car
+from .classes_for_set_db_test import SetTestData
+from .classes_for_stream_db_test import CheckFilterData
+from .classes_for_stream_db_test import StockInfo
+from .classes_for_stream_db_test import StocksTestDataSet
+from .classes_for_stream_db_test import StockTestData
 
 # Initialize logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s [%(name)s] %(message)s')
