@@ -13,6 +13,7 @@ from src.db.base_stream_db import SK
 from src.db.base_stream_db import IKInternal
 from src.db.base_stream_db import SKInternal
 from src.models.transformation import Transformation
+from src.models.transformation import TransformOneToOne
 from src.utils.time_utils import decode_datetime
 from src.utils.time_utils import encode_datetime
 
@@ -85,6 +86,13 @@ class StockInfoStreamAdapter(
     """Base adapter with defined entity transformation"""
 
     value_transformer: Type[Transformation[StockInfo, bytes]] = StockInfoTransformer
+
+
+class StockInfoIntStrStreamAdapter(StockInfoStreamAdapter[int, str, int, str]):
+    """Adapter with int as set identifiers and str as timestamp keys"""
+
+    stream_key_transformer: Type[Transformation[int, int]] = TransformOneToOne[int]
+    ts_transformer: Type[Transformation[str, str]] = TransformOneToOne[str]
 
 
 @dataclass
