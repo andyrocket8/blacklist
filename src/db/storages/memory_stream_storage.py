@@ -77,7 +77,7 @@ class MemoryStreamStorage(IStreamDb[SK, IK, T], Generic[SK, IK, T]):
     async def fetch_records(
         self, stream_id: SK, start_ts: Optional[dt_datetime] = None, end_ts: Optional[dt_datetime] = None
     ) -> AsyncGenerator[tuple[IK, T], None]:
-        stream_data: list[MemoryStorageItem] = self.__storage[stream_id]
+        stream_data: list[MemoryStorageItem] = self.__storage[stream_id].copy()  # make persistent copy
         for item in sorted(stream_data, key=lambda x: x.timestamp):
             current_record_datetime = self.to_datetime_converter(item.timestamp)
             if end_ts is not None and current_record_datetime > end_ts:

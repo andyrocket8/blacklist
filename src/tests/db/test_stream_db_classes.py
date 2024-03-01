@@ -3,6 +3,7 @@ from dataclasses import asdict
 from dataclasses import dataclass
 from datetime import datetime as dt_datetime
 from typing import Generic
+from typing import Optional
 from typing import Type
 
 from src.core.settings import MSK_TZ
@@ -84,3 +85,18 @@ class StockInfoStreamAdapter(
     """Base adapter with defined entity transformation"""
 
     value_transformer: Type[Transformation[StockInfo, bytes]] = StockInfoTransformer
+
+
+@dataclass
+class CheckFilterData:
+    start_date: Optional[dt_datetime]
+    end_date: Optional[dt_datetime]
+    expected_records_count: int
+    expected_first_record: StockTestData
+    expected_last_record: StockTestData
+
+
+@dataclass
+class StocksTestDataSet:
+    stock_test_list: list[StockTestData]
+    check_filter_data_list: list[CheckFilterData]  # some sets for checking filtering
