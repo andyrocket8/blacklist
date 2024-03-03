@@ -56,6 +56,27 @@ class StockInfoTransformer(Transformation[StockInfo, bytes]):
         return StockInfo(**loaded)
 
 
+class StockInfoDictTransformer(Transformation[StockInfo, dict[str, str]]):
+
+    @classmethod
+    def transform_to_storage(cls, value: StockInfo) -> dict[str, str]:
+        return {
+            'stock_name': value.stock_name,
+            'datetime': encode_datetime(value.datetime),
+            'bid': str(value.bid),
+            'ask': str(value.ask),
+        }
+
+    @classmethod
+    def transform_from_storage(cls, value: dict[str, str]) -> StockInfo:
+        return StockInfo(
+            stock_name=value['stock_name'],
+            datetime=decode_datetime(value['datetime']),
+            bid=float(value['bid']),
+            ask=float(value['ask']),
+        )
+
+
 def test_stock_info_transformer():
     stock_info_no_tz = StockInfo(
         stock_name='Total Securities Inc', datetime=dt_datetime(2023, 12, 1, 18, 2, 15), bid=90.4, ask=93.1
@@ -93,6 +114,29 @@ class StockInfoIntStrStreamAdapter(StockInfoStreamAdapter[int, str, int, str]):
 
     stream_key_transformer: Type[Transformation[int, int]] = TransformOneToOne[int]
     ts_transformer: Type[Transformation[str, str]] = TransformOneToOne[str]
+
+
+class TransformIntToStr(Transformation[int, str]):
+
+    @classmethod
+    def transform_to_storage(cls, value: int) -> str:
+        return str(value)
+
+    @classmethod
+    def transform_from_storage(cls, value: str) -> int:
+        return int(value)
+
+
+class StockInfoDictStreamAdapter(BaseStreamDbAdapter[int, str, StockInfo, str, str, dict[str, str]]):
+    """Adapter for transforming
+    - int to str for stream id
+    - str to str for stream timestamp keys
+    - StockInfo into dict[str, bytes] for entities
+    """
+
+    stream_key_transformer: Type[Transformation[int, str]] = TransformIntToStr
+    ts_transformer: Type[Transformation[str, str]] = TransformOneToOne[str]
+    value_transformer: Type[Transformation[StockInfo, dict[str, str]]] = StockInfoDictTransformer
 
 
 @dataclass

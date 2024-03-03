@@ -20,8 +20,9 @@ async def perform_stream_db_test(
     stocks_set_test_data: StocksTestDataSet,
     stream_adapter: Union[
         BaseStreamDbAdapter[int, str, StockInfo, int, str, bytes],
-        BaseStreamDbAdapter[int, str, StockInfo, int, str, dict[str, bytes]],
+        BaseStreamDbAdapter[int, str, StockInfo, str, str, dict[str, str]],
     ],
+    order_on_add: bool = False,
 ):
     """
     During this test we use arbitrary storage for storing streams with int identities, keys as str, and values as bytes
@@ -43,7 +44,7 @@ async def perform_stream_db_test(
     # now can make some operations with storage through adapter
     stock_test_data = stocks_set_test_data.stock_test_list
     # add data with 'save_by_timestamp', expecting sorting of added data by timestamp index
-    for test_record in stock_test_data:
+    for test_record in sorted(stock_test_data, key=lambda x: x.order) if order_on_add else stock_test_data:
         await stream_adapter.save_by_timestamp(set_1, test_record.stock_data, test_record.stock_data.datetime)
     # checking filtering in fetch_records, iterating over test sets
     for test_set in stocks_set_test_data.check_filter_data_list:
@@ -89,7 +90,7 @@ async def perform_stream_db_test(
     assert (await stream_adapter.delete(set_2, map(lambda x: x.timestamp, records))) == len(
         stock_test_data
     ), 'Expecting to delete only existing records in set 2'
-    # assure the data is cleaned from storage
+    # assure the data has been properly cleaned from storage
     assert (
         len([storage_record async for storage_record in stream_adapter.fetch_records(set_1)]) == 0
     ), 'Set 1 must be cleared on end of the test'
