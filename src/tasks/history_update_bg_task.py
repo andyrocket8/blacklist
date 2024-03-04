@@ -4,8 +4,8 @@ from src.db.storages.redis_db import context_async_redis_client
 from src.schemas.addresses_schemas import AgentAddressesInfoWithGroup
 from src.schemas.usage_schemas import ActionType
 from src.service.history_db_service import HistoryDBService
+from src.service.history_processors import HistoryProcessor
 from src.service.usage_db_service import UsageDBService
-from src.service.usage_processors import HistoryProcessor
 
 
 async def update_history_bg_task_ns(

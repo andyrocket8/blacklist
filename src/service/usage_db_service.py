@@ -1,7 +1,7 @@
 """DB Service for usage history processing"""
 
 from src.core.settings import ACTIVE_USAGE_INFO
-from src.schemas.usage_schemas import UsageClassesEncoder
+from src.models.usage_encoders import UsageClassesEncoder
 from src.schemas.usage_schemas import UsageRecord
 from src.service.abstract_hkey_db_service import AbstractHkeyDBService
 
