@@ -3,13 +3,11 @@ import logging
 from src.schemas.addresses_schemas import AgentAddressesInfoWithGroup
 from src.schemas.usage_schemas import UsageRecord
 
-from .usage_db_service import UsageDBService
+from .legacy_usage_db_service import UsageDBService
 
 
-class UsageProcessor:
-    """Processor for storing information about address usages
-    TODO migrate to Stream storage (issue-48)
-    """
+class LegacyUsageProcessor:
+    """Processor for storing information about address usages"""
 
     def __init__(self, db_service: UsageDBService):
         self.db_service = db_service

@@ -11,7 +11,7 @@ class UsageClassesEncoder(JSONEncoder):
             return o.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
         class_name = o.__class__.__name__
         if class_name == 'UsageRecord':
-            return o.model_dump(mode='json')
+            raise NotImplementedError('Legacy class. To delete')
         if class_name == 'StreamUsageRecord':
             return o.model_dump(mode='json')
         if class_name == 'HistoryRecordInfo':

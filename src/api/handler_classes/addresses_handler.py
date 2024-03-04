@@ -12,12 +12,12 @@ from fastapi.security import HTTPAuthorizationCredentials
 
 from src.api.di.db_di_routines import address_with_groups_db_service_adapter
 from src.api.http_auth_wrapper import get_proc_auth_checker
-from src.core.settings import ACTIVE_USAGE_INFO
 from src.core.settings import ALLOWED_ADDRESSES_CATEGORY_NAME
 from src.core.settings import BACKGROUND_ADD_RECORDS
 from src.core.settings import BACKGROUND_DELETE_RECORDS
 from src.core.settings import BANNED_ADDRESSES_CATEGORY_NAME
 from src.core.settings import HISTORY_USAGE_INFO
+from src.core.settings import STREAM_USAGE_INFO
 from src.models.query_params_models import CommonQueryParams
 from src.models.query_params_models import CountAddress
 from src.schemas.addresses_schemas import AgentAddressesInfoWithGroup
@@ -107,11 +107,12 @@ class AddressHandler:
         if len(agent_info.addresses) <= BACKGROUND_ADD_RECORDS:
             # run fast tasks in background
             # Update usage information
-            background_tasks.add_task(update_usage_bg_task_ns, ACTIVE_USAGE_INFO, agent_info)
+            background_tasks.add_task(
+                update_usage_bg_task_ns, STREAM_USAGE_INFO, ActionType.add_action, agent_info, self.__address_category
+            )
             # Update history information
             background_tasks.add_task(
                 update_history_bg_task_ns,
-                ACTIVE_USAGE_INFO,
                 HISTORY_USAGE_INFO,
                 agent_info,
                 ActionType.add_action,
@@ -120,7 +121,9 @@ class AddressHandler:
         else:
             # invoke celery task for update usage and history
             agent_info_dict = agent_info.encode()
-            celery_update_usage_info_task.apply_async((agent_info_dict,))
+            celery_update_usage_info_task.apply_async(
+                (STREAM_USAGE_INFO, ActionType.add_action, agent_info_dict, self.__address_category)
+            )
             celery_update_history_task.apply_async(
                 (
                     agent_info_dict,
@@ -144,8 +147,14 @@ class AddressHandler:
         deleted_count = await service_obj.del_records(agent_info.addresses)
         if len(agent_info.addresses) <= BACKGROUND_DELETE_RECORDS:
             background_tasks.add_task(
+                update_usage_bg_task_ns,
+                STREAM_USAGE_INFO,
+                ActionType.remove_action,
+                agent_info,
+                self.__address_category,
+            )
+            background_tasks.add_task(
                 update_history_bg_task_ns,
-                ACTIVE_USAGE_INFO,
                 HISTORY_USAGE_INFO,
                 agent_info,
                 ActionType.remove_action,
@@ -154,6 +163,9 @@ class AddressHandler:
         else:
             # invoke celery task for update usage
             agent_info_dict = agent_info.encode()
+            celery_update_usage_info_task.apply_async(
+                (STREAM_USAGE_INFO, ActionType.remove_action, agent_info_dict, self.__address_category)
+            )
             celery_update_history_task.apply_async(agent_info_dict, ActionType.remove_action, self.__address_category)
 
         return DeleteResponseSchema(deleted=deleted_count)

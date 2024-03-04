@@ -1,17 +1,19 @@
+from typing import Optional
 from uuid import UUID
 
-from src.db.storages.redis_db import context_async_redis_client
+from src.api.di.db_di_routines import get_stream_db_adapter
 from src.schemas.addresses_schemas import AgentAddressesInfoWithGroup
-from src.service.usage_db_service import UsageDBService
-from src.service.usage_processors import UsageProcessor
+from src.schemas.usage_schemas import ActionType
+from src.service.usage_stream_service import UsageStreamAddService
 
 
-async def update_usage_bg_task_ns(usage_set_id: UUID, agent_info: AgentAddressesInfoWithGroup):
+async def update_usage_bg_task_ns(
+    usage_stream_id: UUID, action: ActionType, usage_info: AgentAddressesInfoWithGroup, address_category: Optional[str]
+):
     """Task invoked with background task in handle.
     Update actual info (timestamp) of adding and deletion of banned addresses
     Use no session in background task call
     """
-    async with context_async_redis_client('background task') as redis_client_obj:
-        usage_db_service = UsageDBService(redis_client_obj, usage_set_id)
-        usage_processor_obj = UsageProcessor(usage_db_service)
-        await usage_processor_obj.update_usages(agent_info)
+    async for stream_db_obj in get_stream_db_adapter():
+        usage_add_service = UsageStreamAddService(usage_stream_id, stream_db_obj)
+        await usage_add_service.add(action, usage_info, address_category)

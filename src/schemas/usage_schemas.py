@@ -54,5 +54,9 @@ class HistoryRecord(BaseModel):
         self.history_records.sort(key=lambda x: x.action_time)
 
 
-class AddressHistoryRecord(HistoryRecord):
+class HistoryAddressData(BaseModel):
     address: IPv4Address
+
+
+class AddressHistoryRecord(HistoryRecord, HistoryAddressData):
+    pass

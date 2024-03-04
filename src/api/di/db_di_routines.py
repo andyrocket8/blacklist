@@ -1,6 +1,7 @@
 # Dependency Injection utilities
 import logging
 from typing import AsyncGenerator
+from typing import Optional
 from uuid import UUID
 
 from src.db.adapters.hash_db_entity_str_adapter import HashDbEntityGroupDataStrAdapter
@@ -22,6 +23,7 @@ from src.db.base_stream_db import IStreamDb
 from src.db.storages.redis_db import context_async_redis_client
 from src.db.storages.redis_db import redis_client
 from src.schemas.usage_schemas import StreamUsageRecord
+from src.service.history_db_service import HistoryDBService
 from src.service.service_db_factories import ServiceAdapters
 from src.service.service_db_factories import ServiceWithGroupDbAdapters
 
@@ -70,6 +72,33 @@ async def get_set_db_adapter() -> AsyncGenerator[ISetDb, None]:
         logging.debug('Finished providing set db adapter')
 
 
+# Stream DB DI routines
 async def get_stream_db_adapter() -> AsyncGenerator[IStreamDb[UUID, str, StreamUsageRecord], None]:
+    """Getting stream DB object for Redis interaction (as generator call)"""
     async for client_obj in redis_client():
         yield UsageStreamRedisAdapter(RedisStreamDbAdapter(client_obj))
+
+
+async def get_stream_db_adapter_job(
+    job_name: Optional[str] = None,
+) -> AsyncGenerator[IStreamDb[UUID, str, StreamUsageRecord], None]:
+    """Getting stream DB object for Redis interaction (with context manager)"""
+    async with context_async_redis_client(job_name if job_name is not None else 'stream management job') as client_obj:
+        logging.debug('Provide stream db adapter')
+        yield UsageStreamRedisAdapter(RedisStreamDbAdapter(client_obj))
+        logging.debug('Finished providing stream db adapter')
+
+
+# HKEY redis DI routines
+async def get_history_db_service() -> AsyncGenerator[HistoryDBService, None]:
+    async for client_obj in redis_client():
+        yield HistoryDBService(client_obj)
+
+
+async def get_history_db_service_for_job(job_name: Optional[str] = None) -> AsyncGenerator[HistoryDBService, None]:
+    async with context_async_redis_client(
+        job_name if job_name is not None else 'history db management job'
+    ) as client_obj:
+        logging.debug('Provide history db service object')
+        yield HistoryDBService(client_obj)
+        logging.debug('Finished providing history db service object')

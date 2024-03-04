@@ -21,7 +21,7 @@ class UsageStreamAddService:
         self,
         action: ActionType,
         usage_info: AgentAddressesInfoWithGroup,
-        action_category: Optional[str] = None,
+        address_category: Optional[str] = None,
         timestamp: Optional[dt_datetime] = None,
     ) -> str:
         """Adding data to service about address usages
@@ -31,7 +31,7 @@ class UsageStreamAddService:
             action_type=action,
             action_time=usage_info.action_time,
             addresses=set(usage_info.addresses),
-            action_category=action_category,
+            address_category=address_category,
             address_group=usage_info.address_group,
         )
         return await self.__stream_db_obj.save_by_timestamp(self.__stream_id, saved_data, timestamp=timestamp)
@@ -58,9 +58,13 @@ class UsageStreamReadService:
         return await self.__stream_db_obj.count(self.__stream_id)
 
 
-def get_usage_add_service(stream_db_obj: IStreamDb[UUID, str, StreamUsageRecord]) -> UsageStreamAddService:
-    return UsageStreamAddService(STREAM_USAGE_INFO, stream_db_obj)
+def get_usage_add_service(
+    stream_db_obj: IStreamDb[UUID, str, StreamUsageRecord], stream_id: Optional[UUID] = None
+) -> UsageStreamAddService:
+    return UsageStreamAddService(STREAM_USAGE_INFO if stream_id is None else stream_id, stream_db_obj)
 
 
-def get_usage_read_service(stream_db_obj: IStreamDb[UUID, str, StreamUsageRecord]) -> UsageStreamReadService:
-    return UsageStreamReadService(STREAM_USAGE_INFO, stream_db_obj)
+def get_usage_read_service(
+    stream_db_obj: IStreamDb[UUID, str, StreamUsageRecord], stream_id: Optional[UUID] = None
+) -> UsageStreamReadService:
+    return UsageStreamReadService(STREAM_USAGE_INFO if stream_id is None else stream_id, stream_db_obj)
