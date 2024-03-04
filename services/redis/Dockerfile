@@ -1,4 +1,5 @@
 FROM redis:7.2.3-alpine3.18
+RUN ln -snf /usr/share/zoneinfo/Europe/Moscow /etc/localtime && echo 'Europe/Moscow' > /etc/timezone
 # use default configuration. Substitute with custom volume mapping on start
 COPY ./services/redis/redis.conf /usr/local/etc/redis/redis.conf
 RUN touch /usr/local/etc/redis/users.acl
