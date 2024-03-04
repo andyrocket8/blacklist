@@ -84,6 +84,13 @@ async def perform_stream_db_test(
     assert counter == len(stock_test_data), 'Expected all records of test set to be in storage in set 2'
     for record_data in records:
         print(await stream_adapter.read(record_data.set_id, record_data.timestamp))
+    # testing length of streams
+    assert await stream_adapter.count(set_1) == len(
+        stock_test_data
+    ), f'Expecting the length of stream with id: {set_1} equal to test data set length'
+    assert await stream_adapter.count(set_2) == len(
+        stock_test_data
+    ), f'Expecting the length of stream with id: {set_2} equal to test data set length'
     assert (await stream_adapter.delete(set_1, map(lambda x: x.timestamp, records))) == len(
         stock_test_data
     ), 'Expecting to delete only existing records in set 1'

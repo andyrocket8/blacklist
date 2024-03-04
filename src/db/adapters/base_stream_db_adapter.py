@@ -13,9 +13,7 @@ from src.db.base_stream_db import IStreamDb
 from src.db.base_stream_db import SKInternal
 from src.models.transformation import Transformation
 from src.schemas.abstract_types import Internal
-from src.schemas.abstract_types import KInternal
 from src.schemas.abstract_types import T
-from src.schemas.abstract_types import VInternal
 
 
 class IStreamDbAdapter(IStreamDb[SK, IK, T], ABC):
@@ -75,11 +73,6 @@ class BaseStreamDbAdapter(IStreamDbAdapter[SK, IK, T], Generic[SK, IK, T, SKInte
                 record[1]
             )
 
-
-class BaseDictStreamAdapter(
-    BaseStreamDbAdapter[SK, IK, T, SKInternal, IKInternal, dict[KInternal, VInternal]],
-    Generic[SK, IK, T, SKInternal, IKInternal, KInternal, VInternal],
-):
-    """Stream Adapter for storing Entities as dicts in storage"""
-
-    pass
+    async def count(self, stream_id: SK) -> int:
+        """Counting the size of stream"""
+        return await self.__stream_db_a.count(self.stream_key_transformer.transform_to_storage(stream_id))

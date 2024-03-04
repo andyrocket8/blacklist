@@ -33,6 +33,8 @@ class StreamUsageRecord(BaseModel):
     action_type: ActionType
     action_time: dt_datetime
     addresses: set[IPv4Address]
+    address_category: Optional[str] = None
+    address_group: Optional[str] = None
 
 
 class HistoryRecordInfo(BaseModel):

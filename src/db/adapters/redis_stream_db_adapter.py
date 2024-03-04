@@ -90,3 +90,7 @@ class RedisStreamDbAdapter(IStreamDbAdapter[str, str, dict[str, str]]):
         except RedisError as e:
             logging.error(f'Error while reading from stream, stream ID: {stream_id}, details: {str(e)}')
             raise IStreamDbError from None
+
+    async def count(self, stream_id: str) -> int:
+        """Counting the size of stream"""
+        return await self.__db.xlen(stream_id)

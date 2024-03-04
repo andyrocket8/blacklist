@@ -87,6 +87,10 @@ class MemoryStreamStorage(IStreamDb[SK, IK, T], Generic[SK, IK, T]):
                 # yield if we are in time range
                 yield item.timestamp, item.value
 
+    async def count(self, stream_id: SK) -> int:
+        """Counting the size of stream"""
+        return len(self.__storage[stream_id])
+
 
 class MemoryStreamTsStorage(MemoryStreamStorage[SK, str, T], Generic[SK, T]):
     """Storage with timestamp likely in redis storage (epoch in millis with unique counter)"""
