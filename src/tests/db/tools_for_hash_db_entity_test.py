@@ -5,9 +5,9 @@ from ipaddress import IPv4Network
 
 from src.db.base_hash_db_entity import IHashDbEntity
 
-from .test_hash_db_classes import AddressInfo
-from .test_hash_db_classes import HostInfo
-from .test_hash_db_classes import NetworkInfo
+from .classes_for_hash_db_test import AddressInfo
+from .classes_for_hash_db_test import HostInfo
+from .classes_for_hash_db_test import NetworkInfo
 
 
 async def check_hash_contents(

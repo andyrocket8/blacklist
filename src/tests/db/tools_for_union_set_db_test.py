@@ -6,7 +6,7 @@ from src.db.base_union_set_db import IUnionSetDb
 from src.schemas.abstract_types import K
 from src.schemas.abstract_types import V
 
-from .test_set_db_classes import SetTestData
+from .classes_for_set_db_test import SetTestData
 
 
 @pytest.mark.asyncio

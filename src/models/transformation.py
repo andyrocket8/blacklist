@@ -25,3 +25,13 @@ class Transformation(ABC, Generic[T, Internal]):
 # Base abstract class type definition for use in storages
 TransT = TypeVar('TransT', bound=Transformation)
 TypeTransT = Type[TransT]
+
+
+class TransformOneToOne(Transformation[T, T], Generic[T]):
+    @classmethod
+    def transform_to_storage(cls, value: T) -> T:
+        return value
+
+    @classmethod
+    def transform_from_storage(cls, value: T) -> T:
+        return value

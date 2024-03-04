@@ -5,7 +5,7 @@ Blacklist is a tool for gathering and publish information about malicious IP add
 Published lists can be used in network devices for blocking access to published IP addresses
 
 Addresses information should be gathered by agents, agents provide actual information to addresses storage.
-So we have always actual information about attackers and can block their activity on Interner connected devices with black listing.
+So we have always actual information about attackers and can block their activity on Internet connected devices with black listing.
 
 Agent can add and delete records from application database with API calls.
 IP addresses aggregate lists also might be obtained with API calls.
@@ -40,7 +40,7 @@ Tokens should also be created with **manage.py** script (see description below i
 ## Deployment
 
 ### Deploy with docker compose
-Use docker-compose.yml for production depolyment
+Use docker-compose.yml for production deployment.
 
 Please set ENV_FILE for valid configuration options. You can create .env file and pass it in ENV_FILE variable
 
@@ -113,3 +113,20 @@ Custom logging available by adding of /src/core/logger_custom.py file.
 If exists it would be loaded on application startup
 
 Use dictionary logging config feature (https://docs.python.org/3/library/logging.config.html)
+
+## Migration routines
+### version 1.9.0 +
+
+For migration of saved usage info and proper /history handle's work you need to migrate usage records before any extra address additions.
+To perform this use **manage.py**.
+Just type in app container:
+```commandline
+python manage.py migrate usage_history
+```
+You will see migration log in console, all should be done with no exceptions.
+If you get exception **ValueError: Usage history must be empty for migration** it means that something was added to the new usage history.
+Therefore, you have to clear usage history in redis-cli with
+```
+del 587bd3a3-53b9-42fc-a763-831c6ac4d215
+```
+After cleaning please repeat the migration.

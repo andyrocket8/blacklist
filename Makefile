@@ -47,7 +47,7 @@ _stop_local:
 		echo "set -a && docker compose --env-file compose-redis-local.env -f docker-compose.yml down" | bash
 
 _start_celery:
-		echo "celery -A src.celery_app worker -l DEBUG" | bash &
+		echo "celery -A src.celery_app worker -l DEBUG"  --max-tasks-per-child 1 | bash &
 
 _coverage:
 		poetry run coverage run -m pytest

@@ -8,9 +8,9 @@ from src.db.base_set_db_entity import ISetDbEntity
 from src.schemas.abstract_types import K
 from src.schemas.abstract_types import V
 
-from .set_db_entity_base_tools import add_records_to_sets
-from .set_db_entity_base_tools import check_set_consistency
-from .test_set_db_classes import SetTestData
+from .classes_for_set_db_test import SetTestData
+from .tools_for_set_db_entity_test import add_records_to_sets
+from .tools_for_set_db_entity_test import check_set_consistency
 
 
 async def run_test_set_db(

@@ -64,4 +64,4 @@ RUN apk --update add curl
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 
-CMD ["/app/.venv/bin/celery", "-A", "src.celery_app", "worker", "-l", "DEBUG"]
+CMD ["/app/.venv/bin/celery", "-A", "src.celery_app", "worker", "-l", "DEBUG", "--max-tasks-per-child", "1"]

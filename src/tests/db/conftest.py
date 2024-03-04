@@ -2,6 +2,8 @@ import logging
 import random
 from dataclasses import dataclass
 from datetime import date as dt_date
+from datetime import datetime as dt_datetime
+from datetime import timedelta
 from ipaddress import IPv4Address
 from ipaddress import IPv4Network
 from typing import Generator
@@ -13,11 +15,15 @@ import pytest
 
 from src.db.storages.redis_db_pool import RedisConnectionPool
 
-from .test_hash_db_classes import AddressInfo
-from .test_hash_db_classes import HostInfo
-from .test_hash_db_classes import NetworkInfo
-from .test_set_db_classes import Car
-from .test_set_db_classes import SetTestData
+from .classes_for_hash_db_test import AddressInfo
+from .classes_for_hash_db_test import HostInfo
+from .classes_for_hash_db_test import NetworkInfo
+from .classes_for_set_db_test import Car
+from .classes_for_set_db_test import SetTestData
+from .classes_for_stream_db_test import CheckFilterData
+from .classes_for_stream_db_test import StockInfo
+from .classes_for_stream_db_test import StocksTestDataSet
+from .classes_for_stream_db_test import StockTestData
 
 # Initialize logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s [%(name)s] %(message)s')
@@ -370,3 +376,106 @@ def union_set_test_data() -> list[SetTestData[UUID, int]]:
             set_data=(5, 6, 7, 8, 9, 10),
         ),
     ]
+
+
+ZERO_ORDER_STOCK_INFO_RECORD = StockTestData(
+    order=0,
+    stock_data=StockInfo(
+        stock_name='Total Securities Inc', datetime=dt_datetime(2023, 12, 1, 18, 0, 3, 101000), bid=89.1, ask=90.4
+    ),
+)
+
+FIRST_ORDER_STOCK_INFO_RECORD = StockTestData(
+    order=1,
+    stock_data=StockInfo(
+        stock_name='Extra Brewery Co', datetime=dt_datetime(2023, 12, 1, 18, 0, 3, 101000), bid=16.12, ask=16.42
+    ),
+)
+
+SECOND_ORDER_STOCK_INFO_RECORD = StockTestData(
+    order=2,
+    stock_data=StockInfo(
+        stock_name='Total Securities Inc', datetime=dt_datetime(2023, 12, 1, 18, 1, 12), bid=88.9, ask=90.1
+    ),
+)
+
+THIRD_ORDER_STOCK_INFO_RECORD = StockTestData(
+    order=3,
+    stock_data=StockInfo(
+        stock_name='Total Securities Inc', datetime=dt_datetime(2023, 12, 1, 18, 2, 15), bid=90.4, ask=93.1
+    ),
+)
+
+FOURTH_ORDER_STOCK_INFO_RECORD = StockTestData(
+    order=4,
+    stock_data=StockInfo(
+        stock_name='Extra Brewery Co', datetime=dt_datetime(2024, 2, 1, 12, 23, 1), bid=18.2, ask=21.3
+    ),
+)
+
+
+@pytest.fixture
+def stocks_test_data() -> list[StockTestData]:
+    return [
+        FOURTH_ORDER_STOCK_INFO_RECORD,  # should be last on in sorted output
+        THIRD_ORDER_STOCK_INFO_RECORD,
+        ZERO_ORDER_STOCK_INFO_RECORD,  # should be first on in sorted output
+        FIRST_ORDER_STOCK_INFO_RECORD,
+        SECOND_ORDER_STOCK_INFO_RECORD,
+    ]
+
+
+@pytest.fixture
+def stocks_set_test_data(stocks_test_data: list[StockTestData]) -> StocksTestDataSet:
+    return StocksTestDataSet(
+        stocks_test_data,
+        [
+            # all records with no filtering
+            CheckFilterData(
+                start_date=None,
+                end_date=None,
+                expected_records_count=5,
+                expected_first_record=ZERO_ORDER_STOCK_INFO_RECORD,
+                expected_last_record=FOURTH_ORDER_STOCK_INFO_RECORD,
+            ),
+            # all records with the first two records with the same time
+            CheckFilterData(
+                start_date=ZERO_ORDER_STOCK_INFO_RECORD.stock_data.datetime,
+                end_date=None,
+                expected_records_count=5,
+                expected_first_record=ZERO_ORDER_STOCK_INFO_RECORD,
+                expected_last_record=FOURTH_ORDER_STOCK_INFO_RECORD,
+            ),
+            # all records without first two records with the same time
+            CheckFilterData(
+                start_date=ZERO_ORDER_STOCK_INFO_RECORD.stock_data.datetime + timedelta(seconds=1),
+                end_date=None,
+                expected_records_count=3,
+                expected_first_record=SECOND_ORDER_STOCK_INFO_RECORD,
+                expected_last_record=FOURTH_ORDER_STOCK_INFO_RECORD,
+            ),
+            # two sides bound search with the inclusion oin the end of search
+            CheckFilterData(
+                start_date=ZERO_ORDER_STOCK_INFO_RECORD.stock_data.datetime + timedelta(seconds=1),
+                end_date=FOURTH_ORDER_STOCK_INFO_RECORD.stock_data.datetime,
+                expected_records_count=3,
+                expected_first_record=SECOND_ORDER_STOCK_INFO_RECORD,
+                expected_last_record=FOURTH_ORDER_STOCK_INFO_RECORD,
+            ),
+            # two sides bound search
+            CheckFilterData(
+                start_date=ZERO_ORDER_STOCK_INFO_RECORD.stock_data.datetime + timedelta(seconds=1),
+                end_date=FOURTH_ORDER_STOCK_INFO_RECORD.stock_data.datetime - timedelta(seconds=1),
+                expected_records_count=2,
+                expected_first_record=SECOND_ORDER_STOCK_INFO_RECORD,
+                expected_last_record=THIRD_ORDER_STOCK_INFO_RECORD,
+            ),
+            CheckFilterData(
+                start_date=None,
+                end_date=THIRD_ORDER_STOCK_INFO_RECORD.stock_data.datetime - timedelta(seconds=1),
+                expected_records_count=3,
+                expected_first_record=ZERO_ORDER_STOCK_INFO_RECORD,
+                expected_last_record=SECOND_ORDER_STOCK_INFO_RECORD,
+            ),
+        ],
+    )

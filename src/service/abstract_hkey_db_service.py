@@ -55,6 +55,6 @@ class AbstractHkeyDBService(Generic[T, JE]):
                 if read_record is not None:
                     yield read_record, key
         else:
-            async for data in self.db.hscan_iter(str(self.set_id), match=match, count=1):
+            async for data in self.db.hscan_iter(str(self.set_id), match=match, count=100):
                 json_data = json.loads(data[1])
                 yield self.service_type(**json_data), data[0]

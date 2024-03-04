@@ -11,10 +11,10 @@ from src.db.adapters.redis_hash_db_entity_adapter import RedisDBEntityAdapter
 from src.db.base_hash_db_entity import IHashDbEntity
 from src.db.storages.memory_hash_storage import STORAGE_DATA_ATTR
 from src.db.storages.memory_hash_storage import MemoryHashStorage
-from src.tests.db.test_hash_db_classes import HashDbEntityNetworkInfoAdapter
+from src.tests.db.classes_for_hash_db_test import HashDbEntityNetworkInfoAdapter
 
-from .hash_db_entity_base_tools import run_test_hash_db_entity
-from .test_hash_db_classes import NetworkInfo
+from .classes_for_hash_db_test import NetworkInfo
+from .tools_for_hash_db_entity_test import run_test_hash_db_entity
 
 
 @pytest.fixture

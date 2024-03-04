@@ -11,6 +11,7 @@ from typing import Union
 from src.db.adapters.redis_set_db_entity_adapter import RedisSetDbEntityAdapter
 from src.db.adapters.set_db_entity_str_adapter import SetDbEntityStrAdapterUUID
 from src.db.storages.redis_db import context_async_redis_client
+from src.migration.migrate_usage_history import migrate_usage_history
 from src.service.token_db_services import AdminTokensSetDBEntityService
 from src.service.token_db_services import AgentTokensSetDBEntityService
 
@@ -40,6 +41,10 @@ def process_tokens(admin_token: Optional[uuid.UUID], agent_token: Optional[uuid.
     )
 
 
+def perform_migrate_usage_history():
+    asyncio.run(migrate_usage_history())
+
+
 def main(args: list[str]):
     # parse args
     parser = argparse.ArgumentParser(description='Blacklist administration utility')
@@ -63,16 +68,28 @@ def main(args: list[str]):
         required=False,
         metavar='[UUID value]',
     )
+
+    migration = subparsers.add_parser(
+        'migrate', description='perform migration routines', help='perform migration routines'
+    )
+    migration.add_argument('migration_type', help='migration type')
     parsed_args = vars(parser.parse_args(args))
-    if parsed_args:
-        admin_token: Optional[uuid.UUID] = parsed_args['admin']
-        agent_token: Optional[uuid.UUID] = parsed_args['agent']
-        if admin_token or agent_token:
-            process_tokens(admin_token, agent_token)
-        else:
-            parser.error('No tokens options (--admin, --agent) specified. Use at least one of them')
-    else:
+    if not parsed_args:
         parser.error('No options specified. Use --help for list of available options')
+    match args[0]:
+        case 'tokens':
+            admin_token: Optional[uuid.UUID] = parsed_args['admin']
+            agent_token: Optional[uuid.UUID] = parsed_args['agent']
+            if admin_token or agent_token:
+                process_tokens(admin_token, agent_token)
+            else:
+                parser.error('No tokens options (--admin, --agent) specified. Use at least one of them')
+        case 'migrate':
+            match parsed_args['migration_type']:
+                case 'usage_history':
+                    perform_migrate_usage_history()
+                case _:
+                    parser.error('Wrong migration type specified, allowed: [usage_history]')
 
 
 if __name__ == '__main__':

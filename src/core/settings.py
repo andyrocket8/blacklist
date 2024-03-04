@@ -1,8 +1,14 @@
 import zoneinfo
 from uuid import UUID
 
+UTC_TZ = zoneinfo.ZoneInfo('UTC')
 MSK_TZ = zoneinfo.ZoneInfo('Europe/Moscow')
 CUR_TZ = MSK_TZ  # alias for current timezone. You are free to redeclare it in further implementations
+
+# Mask for datetime storing as JSON
+ENCODE_DT_MASK = '%Y-%m-%dT%H:%M:%S.%f%z'
+DECODE_DT_MASK_NO_TZ = '%Y-%m-%dT%H:%M:%S.%f'
+
 
 POETRY_CONFIG_FIlE = 'pyproject.toml'
 
@@ -16,9 +22,12 @@ ALLOWED_ADDRESSES_SET_ID = UUID('7ee4e862-6932-41cf-8ef1-09bd80b04a69')
 # Network Set Identifier
 ALLOWED_NETWORKS_SET_ID = UUID('f35f7ce4-da01-4d82-8e43-5059aa30bfa8')
 
-# Usage Set Identifiers
+# Usage Set Identifiers (For HKEY DB services)
 ACTIVE_USAGE_INFO = UUID('9cb46e89-8e7b-43e8-82a3-e7f3248c13a5')
 HISTORY_USAGE_INFO = UUID('67f01230-365b-420f-9a09-8c01faf8193f')
+
+# Usage Set Identifiers (For Stream services)
+STREAM_USAGE_INFO = UUID('587bd3a3-53b9-42fc-a763-831c6ac4d215')
 
 # Auth Set Identifiers
 # place in this set authorization token for agent methods (POST & DELETE methods)
@@ -44,6 +53,8 @@ ALLOWED_NETWORKS_CACHE_SIZE = 1000
 # History param detection mask
 HISTORY_TIMEDELTA_MASK = r'^([0-9]+)([smhd]{1})$'
 
+# Redis streams settings
+MAX_BUNDLE_SIZE = 1000
 
 # Redis container name with tag
 REDIS_DOCKER_IMAGE_NAME = 'redis:7.2.3-alpine3.18'
@@ -61,7 +72,3 @@ DEFAULT_GROUP_NAME = 'default'
 DEFAULT_GROUP_DESCRIPTION = 'Default group'
 ALLOWED_ADDRESSES_GROUP_NAME = ALLOWED_ADDRESSES_CATEGORY_NAME
 BANNED_ADDRESSES_GROUP_NAME = BANNED_ADDRESSES_CATEGORY_NAME
-
-
-# Usage options
-HISTORY_PURGE_ON_LAST_DELETE_OPERATION = False  # Whether delete record in usage history on last delete operation

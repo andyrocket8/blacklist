@@ -16,12 +16,12 @@ from src.db.base_set_db import ISetDb
 from src.db.base_set_db_entity import ISetDbEntity
 from src.db.storages.memory_set_storage import MemorySetStorage
 
-from .set_db_base_tools import run_test_set_db
-from .set_db_base_tools import teardown_test_set_db
+from .classes_for_set_db_test import Car
+from .classes_for_set_db_test import SetDbEntityStrCarAdapter
+from .classes_for_set_db_test import SetTestData
 from .test_memory_set_storage import STORAGE_DATA_ATTR
-from .test_set_db_classes import Car
-from .test_set_db_classes import SetDbEntityStrCarAdapter
-from .test_set_db_classes import SetTestData
+from .tools_for_set_db_test import run_test_set_db
+from .tools_for_set_db_test import teardown_test_set_db
 
 
 @pytest.fixture(scope='function')
